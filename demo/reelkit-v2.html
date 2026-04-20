@@ -21,18 +21,20 @@
 
 <style>
   :root {
-    /* Strict dual palette — yellow + black only. Neutrals are shades of black. */
-    --bg:          #0a0908;
-    --bg-elev:     #14120f;
-    --bg-card:     #1a1714;
-    --ink:         #f4f0e2;
-    --ink-dim:     #a29a87;
-    --ink-mute:    #5c554a;
-    --yellow:      #ffd60a;
-    --yellow-deep: #d4b000;
-    --yellow-soft: rgba(255, 214, 10, 0.14);
-    --border:      rgba(244, 240, 226, 0.08);
-    --border-bold: rgba(244, 240, 226, 0.18);
+    /* Palette — warm-black base + acid pop + peach + plum (4 hues, not slate+blue) */
+    --bg:          #0d0b09;
+    --bg-elev:     #16120f;
+    --bg-card:     #1b1612;
+    --ink:         #f2e9dc;
+    --ink-dim:     #a89c8c;
+    --ink-mute:    #6b6156;
+    --acid:        #d7ff3a;
+    --acid-deep:   #b8db20;
+    --peach:       #ff8466;
+    --plum:        #552a73;
+    --plum-deep:   #2a1138;
+    --border:      rgba(242, 233, 220, 0.09);
+    --border-bold: rgba(242, 233, 220, 0.18);
 
     /* Type */
     --display: 'Fraunces', ui-serif, Georgia, serif;
@@ -80,20 +82,19 @@
   .bg-blob--plum {
     width: 60vw; height: 60vw;
     top: -15vw; right: -10vw;
-    background: radial-gradient(circle, rgba(255, 214, 10, 0.14) 0%, transparent 70%);
-    opacity: 1;
+    background: radial-gradient(circle, var(--plum) 0%, transparent 70%);
   }
   .bg-blob--peach {
     width: 50vw; height: 50vw;
     bottom: -20vw; left: -10vw;
-    background: radial-gradient(circle, var(--yellow) 0%, transparent 65%);
-    opacity: 0.10;
+    background: radial-gradient(circle, var(--peach) 0%, transparent 65%);
+    opacity: 0.18;
   }
   .bg-blob--acid {
     width: 30vw; height: 30vw;
     top: 45%; left: 55%;
-    background: radial-gradient(circle, var(--yellow) 0%, transparent 70%);
-    opacity: 0.06;
+    background: radial-gradient(circle, var(--acid) 0%, transparent 70%);
+    opacity: 0.08;
   }
   .bg-noise {
     position: absolute;
@@ -137,14 +138,14 @@
   .brand-mark {
     width: 26px; height: 26px;
     display: grid; place-items: center;
-    background: var(--yellow);
+    background: var(--acid);
     color: var(--bg);
     border-radius: 7px;
     font-family: var(--mono);
     font-weight: 500;
     font-size: 14px;
   }
-  .brand em { font-style: italic; color: var(--yellow); font-weight: 400; }
+  .brand em { font-style: italic; color: var(--acid); font-weight: 400; }
   .nav-links {
     display: flex; gap: 32px;
     font-size: 14px;
@@ -166,7 +167,7 @@
     font-weight: 500;
     transition: transform 220ms ease, background 220ms ease;
   }
-  .nav-cta:hover { background: var(--yellow); transform: translateY(-1px); }
+  .nav-cta:hover { background: var(--acid); transform: translateY(-1px); }
   .nav-toggle {
     display: none;
     background: none; border: none; color: var(--ink);
@@ -193,14 +194,14 @@
     font-size: 12px;
     letter-spacing: 0.14em;
     text-transform: uppercase;
-    color: var(--yellow);
+    color: var(--acid);
     display: inline-flex; align-items: center; gap: 10px;
     margin-bottom: 28px;
   }
   .eyebrow::before {
     content: '';
     width: 24px; height: 1px;
-    background: var(--yellow);
+    background: var(--acid);
   }
   .hero h1 {
     font-family: var(--display);
@@ -214,7 +215,7 @@
     font-style: italic;
     font-weight: 300;
     font-variation-settings: "opsz" 144;
-    color: var(--yellow);
+    color: var(--peach);
   }
   .hero h1 .word-reveal {
     display: inline-block;
@@ -248,7 +249,7 @@
     transition: transform 240ms cubic-bezier(.2,.8,.2,1), background 240ms ease, border-color 240ms ease;
   }
   .btn-primary {
-    background: var(--yellow);
+    background: var(--acid);
     color: var(--bg);
     position: relative;
     overflow: hidden;
@@ -289,7 +290,7 @@
     inset: -1px;
     border-radius: 24px;
     padding: 1px;
-    background: linear-gradient(140deg, rgba(255,214,10,0.4), transparent 40%, rgba(255,214,10,0.3));
+    background: linear-gradient(140deg, rgba(215,255,58,0.4), transparent 40%, rgba(255,132,102,0.3));
     -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
     -webkit-mask-composite: xor;
             mask-composite: exclude;
@@ -316,7 +317,7 @@
   .reel-thumb {
     width: 72px; height: 96px;
     border-radius: 10px;
-    background: linear-gradient(160deg, var(--plum) 0%, var(--yellow) 60%, var(--yellow) 120%);
+    background: linear-gradient(160deg, var(--plum) 0%, var(--peach) 60%, var(--acid) 120%);
     position: relative;
     flex-shrink: 0;
     overflow: hidden;
@@ -343,7 +344,7 @@
   }
   .reel-arrow {
     display: flex; justify-content: center;
-    color: var(--yellow);
+    color: var(--acid);
     font-family: var(--mono); font-size: 11px;
     letter-spacing: 0.2em;
     margin: 10px 0 14px;
@@ -370,8 +371,8 @@
     display: grid; place-items: center;
     font-size: 15px;
   }
-  .track-icon--video { background: rgba(255,214,10,0.12); color: var(--yellow); }
-  .track-icon--music { background: rgba(255,214,10,0.12); color: var(--yellow); }
+  .track-icon--video { background: rgba(215,255,58,0.12); color: var(--acid); }
+  .track-icon--music { background: rgba(255,132,102,0.12); color: var(--peach); }
   .track-icon--sfx   { background: rgba(85,42,115,0.35); color: #c09fdd; }
   .track-icon--voice { background: rgba(242,233,220,0.08); color: var(--ink); }
   .track .track-label {
@@ -425,7 +426,7 @@
   .section-title em {
     font-style: italic;
     font-weight: 300;
-    color: var(--yellow);
+    color: var(--peach);
   }
   .section-kicker {
     font-family: var(--mono);
@@ -460,7 +461,7 @@
     line-height: 0.95;
     font-weight: 300;
     letter-spacing: -0.04em;
-    color: var(--yellow);
+    color: var(--acid);
   }
   .problem-stat-label {
     font-family: var(--mono);
@@ -482,11 +483,11 @@
   }
   .problem-body em {
     font-style: italic;
-    color: var(--yellow);
+    color: var(--peach);
     font-weight: 400;
   }
   .problem-body .highlight {
-    background: linear-gradient(180deg, transparent 62%, rgba(255,214,10,0.28) 62%);
+    background: linear-gradient(180deg, transparent 62%, rgba(215,255,58,0.28) 62%);
     padding-inline: 2px;
     font-style: normal;
   }
@@ -512,12 +513,12 @@
     border-bottom: 1px solid var(--border);
     transition: background 320ms ease;
   }
-  .how-step:hover { background: rgba(255,214,10,0.02); }
+  .how-step:hover { background: rgba(215,255,58,0.02); }
   .how-num {
     font-family: var(--mono);
     font-size: 13px;
     letter-spacing: 0.12em;
-    color: var(--yellow);
+    color: var(--acid);
   }
   .how-title {
     font-family: var(--display);
@@ -560,7 +561,7 @@
     grid-column: 1;
     grid-row: 1 / span 2;
     background:
-      linear-gradient(165deg, rgba(255,214,10,0.08) 0%, transparent 50%),
+      linear-gradient(165deg, rgba(215,255,58,0.08) 0%, transparent 50%),
       var(--bg-card);
     padding: clamp(28px, 3.5vw, 44px);
     display: flex; flex-direction: column; gap: 28px;
@@ -593,7 +594,7 @@
     line-height: 1.12;
     margin-bottom: 12px;
   }
-  .feat h3 em { font-style: italic; color: var(--yellow); font-weight: 300; }
+  .feat h3 em { font-style: italic; color: var(--acid); font-weight: 300; }
   .feat p {
     font-size: 14.5px;
     color: var(--ink-dim);
@@ -617,9 +618,9 @@
   }
   .chip .chip-dot {
     width: 6px; height: 6px; border-radius: 50%;
-    background: var(--yellow);
+    background: var(--acid);
   }
-  .chip--peach .chip-dot { background: var(--yellow); }
+  .chip--peach .chip-dot { background: var(--peach); }
   .chip--plum .chip-dot  { background: #c09fdd; }
 
   /* --- Moodboard preview within feature card --- */
@@ -635,10 +636,10 @@
     background-size: cover;
     background-position: center;
   }
-  .moodboard div:nth-child(1) { background: linear-gradient(150deg, var(--yellow), var(--plum)); }
-  .moodboard div:nth-child(2) { background: linear-gradient(150deg, var(--yellow), #2a4b0e); }
-  .moodboard div:nth-child(3) { background: linear-gradient(150deg, var(--plum-deep), var(--yellow)); }
-  .moodboard div:nth-child(4) { background: linear-gradient(150deg, #4a2a1f, var(--yellow)); }
+  .moodboard div:nth-child(1) { background: linear-gradient(150deg, var(--peach), var(--plum)); }
+  .moodboard div:nth-child(2) { background: linear-gradient(150deg, var(--acid), #2a4b0e); }
+  .moodboard div:nth-child(3) { background: linear-gradient(150deg, var(--plum-deep), var(--peach)); }
+  .moodboard div:nth-child(4) { background: linear-gradient(150deg, #4a2a1f, var(--peach)); }
   .moodboard div:nth-child(5) { background: linear-gradient(150deg, #1d1a3b, var(--acid-deep)); }
   .moodboard div:nth-child(6) { background: linear-gradient(150deg, #0e3a2c, #7aa95a); }
 
@@ -681,7 +682,7 @@
     white-space: nowrap;
   }
   .marquee-item em {
-    color: var(--yellow);
+    color: var(--acid);
     font-style: italic;
     font-weight: 300;
   }
@@ -719,7 +720,7 @@
   }
   .stat-num .unit {
     font-size: 0.35em;
-    color: var(--yellow);
+    color: var(--peach);
     margin-left: 8px;
     font-style: italic;
     font-weight: 400;
@@ -746,7 +747,7 @@
     left: 50%; top: 10%;
     transform: translateX(-50%);
     width: 70vw; height: 70vw; max-width: 800px; max-height: 800px;
-    background: radial-gradient(circle, rgba(255,214,10,0.09) 0%, transparent 55%);
+    background: radial-gradient(circle, rgba(215,255,58,0.09) 0%, transparent 55%);
     filter: blur(60px);
     pointer-events: none;
   }
@@ -761,7 +762,7 @@
     position: relative;
   }
   .final h2 em {
-    font-style: italic; color: var(--yellow); font-weight: 300;
+    font-style: italic; color: var(--peach); font-weight: 300;
   }
   .final p {
     margin-top: 24px;
@@ -966,7 +967,7 @@
           <div class="track" data-track="video">
             <div class="track-icon track-icon--video">▦</div>
             <div class="track-label">Video cuts <small>4 clips</small></div>
-            <div class="waveform" style="color: var(--yellow);">
+            <div class="waveform" style="color: var(--acid);">
               <span style="height: 40%"></span><span style="height: 70%"></span><span style="height: 55%"></span><span style="height: 88%"></span><span style="height: 62%"></span><span style="height: 74%"></span><span style="height: 45%"></span><span style="height: 90%"></span><span style="height: 60%"></span><span style="height: 35%"></span><span style="height: 72%"></span><span style="height: 48%"></span>
             </div>
             <div class="track-duration">00:27</div>
@@ -975,7 +976,7 @@
           <div class="track" data-track="music">
             <div class="track-icon track-icon--music">♪</div>
             <div class="track-label">Background music <small>matched · 94%</small></div>
-            <div class="waveform" style="color: var(--yellow);">
+            <div class="waveform" style="color: var(--peach);">
               <span style="height: 55%"></span><span style="height: 72%"></span><span style="height: 68%"></span><span style="height: 84%"></span><span style="height: 48%"></span><span style="height: 78%"></span><span style="height: 92%"></span><span style="height: 58%"></span><span style="height: 66%"></span><span style="height: 74%"></span><span style="height: 52%"></span><span style="height: 80%"></span>
             </div>
             <div class="track-duration">00:27</div>
