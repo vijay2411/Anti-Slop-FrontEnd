@@ -1,6 +1,6 @@
 # Anti-Slop Frontend
 
-> **Stop Claude (and every other coding agent) from shipping purple-gradient, Inter-everywhere, 2×2-bento-card AI slop.**
+> **Stop Claude (and every other coding agent) from shipping purple-gradient, Inter-everywhere, 2×2-bento-card AI slop — while keeping the app functional, secure, and respectful of existing project UI.**
 
 A Claude Code skills pack that replaces Anthropic's default `frontend-design` with a curated stack of **13 skills** — one mega-router + one render verifier + 11 specialists — that enforce rich, intentional, motion-driven, multi-device, *verified* interfaces.
 
@@ -18,7 +18,27 @@ That's it. Next frontend request you give Claude, the mega-skill fires first and
 
 **Without this pack** — generic SaaS: purple→pink gradient, Inter for everything, 3 identical feature cards in a bento, `hover:opacity-80`, no motion, no personality.
 
-**With this pack** — every frontend task requires:
+**With this pack** — every frontend task is gated by an *Absolute Iron Law*:
+
+> **1. Functional first. 2. Secure second. 3. Respect existing UI third. 4. Anti-slop aesthetics fourth.**
+
+### Brownfield vs greenfield — mode auto-detected
+
+- **Brownfield** (project already has a UI): the pack audits `tailwind.config`, `globals.css`, existing `components/`, fonts, motion library — then *matches* the existing style. Only additive changes. Never swaps tokens, fonts, or libraries without explicit permission. Creativity engages only when the user says "modernize" / "revamp" / "surprise me".
+- **Greenfield** (new / empty project): the full creative pipeline fires — trend research, adventurous palette, motion, variadic animation, etc.
+
+### Security + functionality baseline (always on)
+
+Non-negotiable checks every build runs before shipping:
+- ✅ **No secrets in client code** — API keys, tokens, passwords grep'd out of the diff
+- ✅ **No XSS vectors** — raw-HTML injection requires a sanitizer, no dynamic code evaluation
+- ✅ **Env-var hygiene** — secrets never prefixed `NEXT_PUBLIC_` / `VITE_` / `REACT_APP_`
+- ✅ **Auth gates actually gate** — not just CSS-hidden admin UI
+- ✅ **Functional correctness** — forms submit, buttons route, loading + error + empty states, keyboard nav
+- ✅ **Accessibility** — aria labels, alt text, focus-visible, semantic headings, WCAG contrast, reduced-motion respected
+
+### Creative pipeline (greenfield, or brownfield with user permission)
+
 - ✅ **Trend research** before anything else (WebSearch + awwwards / godly / land-book pass)
 - ✅ **Dependency receipt** — every lib, token, and asset sourced before the first line of code
 - ✅ A **vibe reference** (from Made-in-Webflow, a named brand, or a Stitch mockup)
@@ -30,7 +50,7 @@ That's it. Next frontend request you give Claude, the mega-skill fires first and
 - ✅ **Multi-device proof** — mobile (375), tablet (768), desktop (1440) all verified
 - ✅ **Rendered verification** via Playwright MCP — console clean, snapshot complete, screenshot inspected
 
-...and the mega-skill auto-rejects drafts containing any of 26 specific slop patterns.
+...and the mega-skill auto-rejects drafts containing any of 40+ specific slop, security, or drift patterns.
 
 See a real output in [`demo/reelkit.html`](./demo/reelkit.html) — open it in any browser.
 

@@ -1,21 +1,80 @@
 ---
 name: anti-slop-frontend
-description: Use before ANY frontend work - landing pages, components, dashboards, marketing sites, hero sections, forms, modals, cards, navigation, pricing pages, artifacts, or anything rendered in a browser. Also use when the user says "build a UI", "make a page", "design this", "frontend", "website", "app shell", "component", or anything visual. This is the master routing skill that vetoes AI slop (purple gradients, Inter-everywhere, 2x2 bento, generic shadcn defaults, safe grey-plus-one-accent palettes, desktop-only layouts, unverified "probably works" claims) and dispatches to the right specialist skills (taste-skill, ui-ux-pro-max, skillui, awesome-design-md, webgpu, verify-frontend-render) plus mandatory trend research, adventurous colour, multi-device responsive, and browser-rendered verification layers.
+description: Use before ANY frontend work - landing pages, components, dashboards, marketing sites, hero sections, forms, modals, cards, navigation, pricing pages, artifacts, or anything rendered in a browser. Also use when the user says "build a UI", "make a page", "design this", "frontend", "website", "app shell", "component", or anything visual. This is the master routing skill that enforces functional + secure code first, respects existing project UI (brownfield mode), vetoes AI slop (purple gradients, Inter-everywhere, 2x2 bento, generic shadcn defaults, safe grey-plus-one-accent palettes, desktop-only layouts, unverified "probably works" claims, security leaks, unauthorized design-system overhauls), and dispatches to the right specialist skills (taste-skill, ui-ux-pro-max, skillui, awesome-design-md, webgpu, verify-frontend-render) plus mandatory trend research, adventurous colour, multi-device responsive, and browser-rendered verification layers.
 ---
 
 # Anti-Slop Frontend Mega-Skill
 
 **Invoke this FIRST for any frontend request. Before writing a single JSX tag.**
 
-This skill has one job: stop AI-slop frontend from shipping. It does that by (a) banning specific default patterns, (b) forcing the specialist skills to do their jobs, and (c) requiring concrete inspiration before any code runs.
+This skill has one job: stop AI-slop frontend from shipping — AND keep the app functional, secure, and respectful of existing project UI. It does that by (a) enforcing non-negotiable safety rules, (b) banning specific default patterns, (c) forcing the specialist skills to do their jobs, and (d) requiring concrete inspiration + verification before claiming done.
 
 ---
 
-## The Iron Law
+## THE ABSOLUTE IRON LAW (overrides everything below)
 
-> **No frontend code ships without: trend research + 1 vibe reference + 1 design system + motion + animated elements + intentional typography + adventurous colour + multi-device proof + rendered verification.**
+> **1. Functional first. 2. Secure second. 3. Respect existing UI third. 4. Anti-slop aesthetics fourth.**
+>
+> If rules 1–3 conflict with rules 4+ (the aesthetic rules): **rules 1–3 win. Always. Without discussion.**
 
-Nine requirements. None are optional. The rest of this skill explains each.
+A beautiful page that leaks API keys is a catastrophic ship. A beautiful page where the signup form silently fails is a failure. A "modernized" UI that replaced the client's brand system without permission is a breach of trust. These outcomes are worse than generic-looking UI.
+
+**Aesthetics are the icing. Functionality, security, and project respect are the cake. Never serve icing without cake.**
+
+---
+
+## The Aesthetic Iron Law (subordinate to the Absolute Iron Law above)
+
+> **No NEW frontend code ships without: trend research + 1 vibe reference + 1 design system + motion + animated elements + intentional typography + adventurous colour + multi-device proof + rendered verification.**
+
+Nine requirements. None are optional — **for greenfield work**. For brownfield work, see Rule -1 below: these become *additive* rather than prescriptive.
+
+---
+
+## -1. Brownfield vs Greenfield — AUDIT BEFORE DESIGNING
+
+**The single most damaging thing this skill could do is overhaul a live project's UI.** Before Rule 0 and all aesthetic rules, determine the mode.
+
+### Audit checklist (run this FIRST, every time)
+
+Scan the project for signs of existing UI language:
+
+| Signal | What it tells you |
+|---|---|
+| `tailwind.config.*` with custom `theme.colors` / `fontFamily` | Existing token system — match it |
+| `globals.css` / `app.css` with `:root` CSS vars | Existing design tokens — use them |
+| `components/ui/` or `components/` with ≥3 components | Existing component library — extend, don't replace |
+| `package.json` has `motion` / `framer-motion` / `gsap` / `@react-spring` | Existing motion stack — use the one already there |
+| `next/font` already configured in `layout.tsx` or `_app.tsx` | Typography is already picked — don't swap |
+| Shadcn `components.json` present | Shadcn system — match its variant patterns |
+| Multiple existing pages with consistent look | Brand is set — infer + follow |
+| A `DESIGN.md` / `brand.md` in the repo | Explicit design spec — **read it first, follow it** |
+| `.figma` file refs / Storybook config | Design handoff — match what's there |
+
+**≥1 signal above ⇒ BROWNFIELD mode.**
+**Zero signals ⇒ GREENFIELD mode.**
+
+### BROWNFIELD mode rules (non-negotiable)
+
+1. **Read before writing.** Read the existing tokens (`tailwind.config`, `:root`, design files). Read at least one representative existing page/component. Summarize the existing design language in your response: colour palette, typography, spacing rhythm, motion library, component variants.
+2. **Match, don't replace.** Use the tokens and components that already exist. If `--accent: #3366ff` is defined, use `var(--accent)` — do not introduce your own orange. If the project uses `framer-motion`, use `framer-motion` — do not migrate it to `motion/react` unless the user explicitly asks.
+3. **Only additive changes.** New sections should adopt the existing voice. A new component should look like a sibling of existing components, not an import from a different product.
+4. **Never swap without explicit permission.** Do NOT change the font family. Do NOT repaint the palette. Do NOT swap the motion library. Do NOT reorganize the component directory. If you believe a swap would be beneficial, *ask the user first* — do not unilaterally modernize.
+5. **Trend research becomes advisory, not directive.** You may still research current trends, but they inform *subtle* enhancements (a new scroll reveal, a polish on an existing button) — not a redesign.
+6. **Enhancement is welcome when prompted.** If the user says "make it more animated", "go bigger", "revamp the hero", "modernize it", then aesthetic Rules 0–9 engage fully and creativity is on.
+7. **Default behaviour: conservative.** Ambiguity resolves *toward* matching the existing UI, not overhauling it.
+
+### GREENFIELD mode rules
+
+All aesthetic Rules 0–9 engage fully. Research trends. Pick adventurous palettes. Surprise the user. Make it distinctive.
+
+### How to respond when you've detected brownfield
+
+Before any code, reply with something like:
+
+> "I see this project already has an established UI: [summary of tokens/fonts/motion lib/component patterns observed]. I'll match that style and only add [what the user asked for]. I won't swap the palette, fonts, or motion library unless you ask me to — say 'go ahead and modernize' or 'surprise me' and I'll switch to creative mode."
+
+Then proceed with matching code.
 
 ---
 
@@ -250,6 +309,74 @@ If Playwright MCP is unavailable, admit it and ask the user to open the file and
 
 ---
 
+## 10. Functional + Secure ALWAYS (the Absolute Iron Law, enumerated)
+
+**This rule is above all aesthetic rules.** A page that looks beautiful but leaks secrets, breaks forms, crashes on submit, or opens XSS holes is a catastrophic failure. Treat this section with the highest regard.
+
+### Functional correctness — non-negotiable
+
+- **Forms submit.** Every `<form>` has a handler or `action`. Every button with an intent has an `onClick` / link.
+- **No dead buttons.** If a CTA says "Start your vault", it must route somewhere real (or an explicit placeholder with a TODO commented for the user).
+- **Loading states.** Any async operation shows a loading indicator. Never a frozen UI.
+- **Error states.** Any async operation handles failure visibly — not just `console.error`.
+- **Empty states.** Lists / search results / tables handle the zero-results case.
+- **Keyboard nav.** `Tab` order works, `Enter`/`Space` activate buttons, `Esc` closes modals, focus trap inside modals.
+- **Form validation.** Required fields validated client-side for UX *and* server-side for safety.
+- **Navigation.** Every route in nav resolves to something (no 404-on-click).
+- **State persistence.** If data is entered, survive route changes / page refresh where reasonable.
+
+### Security — non-negotiable
+
+- [ ] **No secrets in client code.** Grep the diff for obvious API-key patterns (`sk_`, `pk_live`, `api_key`, `AKIA`, `AIza`, `Bearer `, `password =`, `SECRET_`). If found: stop. Move to env var. Never commit.
+- [ ] **No unsafe raw-HTML injection.** React's raw-HTML prop (the `dangerouslySet` one) must always be paired with a sanitizer like DOMPurify. Never pass raw user content to it.
+- [ ] **No dynamic-code execution.** Avoid `eval`, dynamic function constructors, and `setTimeout` with a string argument. All are XSS vectors.
+- [ ] **External links** have `rel="noopener noreferrer"` when `target="_blank"`.
+- [ ] **Env var hygiene.** Server-only secrets are NEVER prefixed `NEXT_PUBLIC_` / `VITE_` / `REACT_APP_`. Any such prefix leaks the value to the browser bundle.
+- [ ] **User-generated content** is escaped before rendering. React escapes by default — but not inside raw-HTML injection, inline event handlers, or `href={userContent}` (check for `javascript:` URIs).
+- [ ] **Auth gates actually gate.** Don't rely on CSS `display: none` to hide admin UI from a non-admin — they can View Source. Check auth state + don't render.
+- [ ] **No PII in URLs.** Emails, tokens, IDs in URL params get logged in analytics, referer headers, browser history.
+- [ ] **No sensitive tokens in `localStorage`.** Prefer httpOnly cookies for session tokens. localStorage is XSS-accessible.
+- [ ] **Third-party scripts** (CDNs, analytics) — version-pinned, from trusted sources, ideally with SRI hashes (`integrity="sha384-..."`).
+- [ ] **File uploads** validate MIME type *and* file size *and* ownership, server-side. Never trust the client.
+- [ ] **CSRF protection** on any mutation endpoint that uses cookies for auth (SameSite=Strict or explicit tokens).
+- [ ] **Rate limiting** on public endpoints (auth, search, contact forms) — server-side.
+- [ ] **Destructive actions** require confirmation (delete, pay, send). `confirm()` is the floor; a typed-name modal is better.
+- [ ] **Error messages** don't leak internals ("SQL error at line 42" → NO; "Something went wrong, try again" → yes).
+- [ ] **`.env*` files** are in `.gitignore`. Double-check before committing.
+- [ ] **Console-log hygiene.** Remove debug `console.log` calls that print user data or tokens before shipping.
+
+### Accessibility is functional (not aesthetic)
+
+Accessibility isn't a "nice to have" — it's functionality for ~15% of users who need it and a courtesy (+ legal requirement in many jurisdictions) for everyone:
+
+- [ ] Every interactive element has an accessible name (`aria-label`, `<label for>`, visible text)
+- [ ] Every `<img>` has `alt` text (empty `alt=""` is fine for decorative)
+- [ ] Colour contrast: body text ≥ 4.5:1, large text ≥ 3:1, UI components ≥ 3:1 against background
+- [ ] Focus-visible states are visible (never `outline: none` without a replacement)
+- [ ] Motion respects `prefers-reduced-motion`
+- [ ] Form inputs have associated labels (not placeholder-as-label)
+- [ ] Heading order is semantic (`h1` → `h2` → `h3`, no skipping)
+- [ ] `<button>` for actions, `<a>` for navigation — not divs with `onClick`
+
+### On conflict with aesthetic rules
+
+If a security rule and an aesthetic rule collide:
+- Security wins. Always.
+- Example: "Animate counter from 0→200" vs "counter shows balance pulled from URL ?balance=200 param" — do NOT trust the URL value as authoritative balance. Show loading, fetch from server.
+- Example: "Bento grid with a user testimonial" vs "testimonial content could contain HTML from user submissions" — escape on display, never inject raw HTML from user content.
+
+### Red flags — STOP and fix immediately
+
+- You're about to commit a `.env`, `secrets.json`, or any file with a real key
+- You wrote React raw-HTML injection with unescaped user content
+- You wrote `localStorage.setItem('token', jwt)` where jwt is a session token
+- You prefixed a secret env var with `NEXT_PUBLIC_`
+- You're showing an error message that includes a database query or stack trace
+- You added a "Delete all" button without any confirmation
+- You have a navigation item that links nowhere (or to `#`)
+
+---
+
 ## The Hard Blocklist — these ship as AI slop, REJECT them
 
 Before submitting any frontend code, verify it does NOT contain:
@@ -282,6 +409,18 @@ Before submitting any frontend code, verify it does NOT contain:
 | Body text < 16px on mobile inputs | Triggers iOS zoom-on-focus (Rule 8) |
 | Claimed "done" without invoking verify-frontend-render | No evidence = not done (Rule 9) |
 | "Probably renders fine" reasoning without a screenshot | Unverified = unshipped (Rule 9) |
+| Overhauled existing UI without user permission | Brownfield breach (Rule -1) |
+| Swapped existing font / colour tokens / motion lib unprompted | Brownfield breach (Rule -1) |
+| Ignored existing `components/ui/` library, rolled fresh components | Brownfield breach (Rule -1) |
+| Applied aesthetic Rules 0-9 creatively to an established product | Brownfield breach (Rule -1) |
+| Committed a `.env` / secrets / API key to git | Security failure (Rule 10) |
+| Raw-HTML injection of user content without sanitizer | XSS hole (Rule 10) |
+| `NEXT_PUBLIC_` / `VITE_` / `REACT_APP_` prefix on a secret | Secret leaked to browser (Rule 10) |
+| Session tokens in `localStorage` | XSS-exfiltrable (Rule 10) |
+| Error message leaks stack trace / SQL / internal path | Info disclosure (Rule 10) |
+| Dead button / broken form / nav link to `#` shipped | Functional failure (Rule 10) |
+| Missing alt text / aria labels on interactive elements | Accessibility failure (Rule 10) |
+| `outline: none` on focus without replacement | Keyboard-users locked out (Rule 10) |
 
 If a draft contains any of the above, rewrite before showing the user.
 
@@ -290,19 +429,33 @@ If a draft contains any of the above, rewrite before showing the user.
 ## Workflow (do these IN ORDER)
 
 ```
-0. Research current trends (WebSearch or awwwards/godly/land-book) → write trend notes comment
-0b. Write dependency receipt → confirm every lib, token, and asset has a verified source
-1. Parse vibe → pick ONE of {awesome-design-md, skillui, ui-ux-pro-max, taste-skill, stitch-workflow}
-2. Pull vibe reference (webflow-inspiration or brand URL) → comment it at top of file
-3. Pick typography via google-fonts-picker → wire via next/font/google
-4. Pick an ADVENTUROUS colour palette (Rule 7) — 3+ hues, one unexpected
-5. Scaffold JSX background component → absolute inset-0 -z-10
-6. Write layout with motion.dev primitives for entrance + scroll
-7. Install ≥1 animate-ui element for the hero feature
-8. Write mobile + tablet + desktop styles as you go (Rule 8) — not as an afterthought
-9. Run mental pass against the Hard Blocklist below
-10. INVOKE verify-frontend-render — run all 3 phases. No exceptions.
-11. Only after verify-frontend-render passes: invoke polish + normalize + critique skills
+-1. Audit project: BROWNFIELD or GREENFIELD? Summarize existing design language if brownfield.
+-1b. Apply Rule 10 — Functional + Secure is baseline, not optional. Keep it in mind at every step.
+
+── If BROWNFIELD ──
+   a. Match existing tokens / fonts / motion lib / components. Do not swap.
+   b. Only additive changes unless user said "modernize" / "revamp" / "surprise me".
+   c. Skip Rules 0, 1, 3 (typography), 7 (colour) prescriptively — use what's there.
+   d. Still apply Rules 8 (responsive) + 9 (verify) + 10 (functional/secure).
+   e. Report the match strategy to the user before coding.
+
+── If GREENFIELD ──
+   0.  Research current trends (WebSearch or awwwards/godly/land-book) → trend notes comment
+   0b. Write dependency receipt → every lib / token / asset has a verified source
+   1.  Parse vibe → pick ONE of {awesome-design-md, skillui, ui-ux-pro-max, taste-skill, stitch-workflow}
+   2.  Pull vibe reference (webflow-inspiration or brand URL) → comment it at top of file
+   3.  Pick typography via google-fonts-picker → wire via next/font/google
+   4.  Pick an ADVENTUROUS colour palette (Rule 7) — 3+ hues, one unexpected
+   5.  Scaffold JSX background component → absolute inset-0 -z-10
+   6.  Write layout with motion.dev primitives for entrance + scroll
+   7.  Install ≥1 animate-ui element for the hero feature
+   8.  Write mobile + tablet + desktop styles as you go (Rule 8) — not as an afterthought
+
+── Always (both modes) ──
+   9.  Audit against Rule 10 — functional + secure + a11y checklist
+   10. Run mental pass against the Hard Blocklist below
+   11. INVOKE verify-frontend-render — 3 phases including security + (if brownfield) drift check. No exceptions.
+   12. Only after verify-frontend-render passes: invoke polish + normalize + critique
 ```
 
 ---
@@ -351,6 +504,15 @@ If a draft contains any of the above, rewrite before showing the user.
 | "The user can resize and check" | That's your job. Use Playwright MCP to resize at 375/768/1440. |
 | "The code looks right, it'll probably render" | Probably is not shipped. Invoke verify-frontend-render. |
 | "It's just static HTML, what can break" | Missing CSS vars, absolute elements escaping, fonts failing silently — all of these. Verify. |
+| "The existing UI looks AI-slop, I should fix it" | **NO.** You were hired to build feature X, not redesign. Ask first. |
+| "The user will love the modernization" | You don't know that. Their brand / users / stakeholders may have rejected it already. Ask first. |
+| "I'll just swap `framer-motion` for `motion`, it's better" | The project chose framer-motion deliberately or by convention. Don't swap without permission. |
+| "The old font is ugly, I'll use Instrument Serif" | **NO.** Match what's there. Don't touch typography without permission. |
+| "Security is the backend team's job" | Client-side is part of the attack surface. XSS, secret leaks, open redirects all ship from frontend. |
+| "Dangerous HTML injection is fine here, the content is trusted" | User content is never trusted. Sanitize anyway. |
+| "This is a prototype, security can wait" | Prototypes leak. The `.env` you commit today haunts you forever. |
+| "Alt text / aria-label slows me down" | ~15% of users depend on it. It's functionality. Not optional. |
+| "`outline: none` looks cleaner" | Keyboard users are now lost. Add a visible focus-visible replacement. |
 
 ---
 
@@ -370,7 +532,16 @@ If a draft contains any of the above, rewrite before showing the user.
 - You used `overflow-x: hidden` on `<body>` instead of finding the overflowing element
 - You said "it should work" or "here's the page" without invoking `verify-frontend-render`
 - Your nav has 5+ desktop links and no mobile pattern
+- You ran an aesthetic overhaul on an existing project without asking permission
+- You changed the font family / colour tokens / motion library in a brownfield project without permission
+- You skipped reading `tailwind.config` / `globals.css` / existing `components/` before coding
+- You wrote raw-HTML injection of user content without a sanitizer
+- You put a secret env var with `NEXT_PUBLIC_` / `VITE_` / `REACT_APP_` prefix
+- You stored an auth token in `localStorage`
+- You shipped a button with no handler, or a nav link to `#`
+- You set `outline: none` on focus without a visible replacement
+- You're about to commit a `.env` / `secrets.json` / key file
 
 ---
 
-**Non-negotiable. Cannot be rationalized away. Ship with taste AND verify OR don't ship.**
+**Non-negotiable. Cannot be rationalized away. Functional + secure + respectful OR don't ship. Ship with taste AND verify OR don't ship.**

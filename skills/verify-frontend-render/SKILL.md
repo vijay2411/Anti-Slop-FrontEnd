@@ -1,6 +1,6 @@
 ---
 name: verify-frontend-render
-description: Use AFTER generating any frontend code and BEFORE claiming the work is done - trigger on phrases like "here's the page", "I've built it", "it's ready", "try it out", "take a look", or before closing any frontend-related task. Forces a 3-phase hard check - pre-flight dependency declaration, post-write structural self-audit, and browser render verification via Playwright MCP (console errors, network 4xx/5xx, accessibility snapshot, full-page screenshot). Blocks "done" claims until every check passes. Catches missing libraries, broken imports, undefined CSS vars, positioning failures, elements that never rendered, silent console errors, and motion that failed to load.
+description: Use AFTER generating any frontend code and BEFORE claiming the work is done - trigger on phrases like "here's the page", "I've built it", "it's ready", "try it out", "take a look", or before closing any frontend-related task. Forces a multi-phase hard check - pre-flight dependency declaration, post-write structural self-audit (imports, CSS vars, responsive invariants, motion states), security audit (secrets, XSS vectors, env-var leakage, unsafe HTML injection, auth gates, external link hygiene), brownfield drift check (did we replace tokens/fonts/motion lib we shouldn't have?), accessibility audit, and browser render verification via Playwright MCP (console errors, network 4xx/5xx, a11y snapshot, full-page screenshot, resize to 375/768/1440). Blocks "done" claims until every check passes. Catches missing libraries, broken imports, undefined CSS vars, positioning failures, elements that never rendered, silent console errors, motion that failed to load, leaked secrets, XSS holes, unauthorized design-system overhauls, and accessibility regressions.
 ---
 
 # Verify Frontend Render
@@ -9,9 +9,11 @@ description: Use AFTER generating any frontend code and BEFORE claiming the work
 
 ## The Iron Law
 
-> **No "done" without verification. No verification without rendering. No rendering without a dependency receipt.**
+> **No "done" without: functional + secure + brownfield-respectful + rendered + a11y-audited.**
+>
+> Security leaks, broken forms, unauthorized UI overhauls, and accessibility regressions all block "done" claims — regardless of how beautiful the page looks.
 
-If you wrote frontend code and haven't (1) declared and verified every import + CSS token, (2) rendered it in a browser, (3) checked console + network + a11y snapshot — then it is **not** done. Say so explicitly. Never claim success on unverified UI.
+If you wrote frontend code and haven't (1) declared and verified every import + CSS token, (2) passed security + brownfield-drift + accessibility audits, (3) rendered it in a browser, (4) checked console + network + a11y snapshot — then it is **not** done. Say so explicitly. Never claim success on unverified UI.
 
 ## Why this skill exists
 
@@ -85,6 +87,50 @@ Run this checklist against the code you just wrote. One line per check, mark ✓
 - [ ] Every section in the design spec is present in the output
 - [ ] Every interactive element (CTA, form, nav) has a working handler or href
 - [ ] No lorem-ipsum or TODO placeholders
+
+### Security audit — ABOVE ALL (Rule 10 enforcement)
+
+Run these in order. **Any failure blocks proceeding.** Not "fix after the screenshot" — fix *now*.
+
+- [ ] **Secret scan.** Grep the diff for patterns: `sk_live`, `sk_test`, `pk_live`, `api[_-]?key`, `AKIA`, `AIza`, `Bearer `, `SECRET_`, `password\s*=\s*["']`, `PRIVATE_KEY`. **Any hit → stop, move to env var, do NOT commit.**
+- [ ] **Raw HTML injection check.** Grep for React's raw-HTML prop (the `dangerouslySet*HTML` one). Every occurrence must be paired with a sanitizer call (DOMPurify or equivalent) in the same expression. If user-generated content flows in, the sanitizer is mandatory.
+- [ ] **Dynamic code execution.** Grep for the three-letter `e-v-a-l` function, dynamic function constructors, and `setTimeout` / `setInterval` with string-literal first arguments. All are forbidden in production client code.
+- [ ] **Exposed env vars.** Grep for env-var prefixes that leak to the browser: `NEXT_PUBLIC_`, `VITE_`, `REACT_APP_`, `EXPO_PUBLIC_`. Any variable with this prefix whose value looks secret-shaped (API key, password, private key, token) is a leak. Move it server-side.
+- [ ] **External link hygiene.** Every `target="_blank"` has matching `rel="noopener noreferrer"` (grep both, count must match).
+- [ ] **`javascript:` URI check.** Grep `href={` for any expression that could produce a `javascript:` URL from user content. Reject.
+- [ ] **Auth gate check.** Any admin/protected page must check auth state in code, not just hide with CSS `display: none` / `visibility: hidden`. Verify no sensitive data is shipped in the HTML payload to unauthenticated users.
+- [ ] **Token storage audit.** Grep `localStorage.setItem` and `sessionStorage.setItem`. If the value is a session token / JWT / auth token, flag it — prefer httpOnly cookies. localStorage is XSS-accessible.
+- [ ] **Error-message leakage.** Grep rendered error text for SQL, stack traces, internal paths, environment names. User-facing errors must be generic.
+- [ ] **`.env` / `secrets.json` / key-files** are present in `.gitignore`. If adding one, confirm it's ignored.
+- [ ] **Console-log hygiene.** Grep `console.log` in code being shipped. Any `console.log(user)` / `console.log(token)` / `console.log(req.headers)` → delete.
+- [ ] **Third-party scripts** are version-pinned (`@12.0.1`, not `@latest`) and from trusted CDNs. Ideally with SRI `integrity` hash.
+- [ ] **Destructive actions** (delete, pay, send, transfer) have a confirmation step — `confirm()` minimum, typed-name modal preferred for irreversible ops.
+
+### Accessibility audit — also functional (Rule 10)
+
+- [ ] Every `<button>` / `<a>` has an accessible name (visible text or `aria-label`)
+- [ ] Every `<img>` has `alt=""` (empty OK for decorative) or descriptive text
+- [ ] `<button>` used for actions, `<a href>` for nav — no divs-with-onClick
+- [ ] Form inputs have `<label for>` or `aria-label` (placeholder-as-label rejected)
+- [ ] Heading order is semantic — `h1` → `h2` → `h3`, no skipping levels
+- [ ] Focus-visible states exist; `outline: none` has a visible replacement
+- [ ] Colour contrast: body text ≥ 4.5:1, large text ≥ 3:1 (Playwright can't always check this — eyeball or use a contrast tool)
+- [ ] `prefers-reduced-motion` honoured (search for the media query or `useReducedMotion()`)
+- [ ] Modal/dialog has focus trap + ESC-to-close + returns focus on close
+- [ ] Every interactive element has a visible focus indicator
+
+### Brownfield drift check — (if the project had existing UI)
+
+If the original project showed signs of brownfield (`tailwind.config` with custom theme, existing `components/`, pre-configured fonts, existing motion library), verify you did **NOT** drift:
+
+- [ ] Tokens (`--accent`, `--bg`, `--font-display`, etc.) — did you introduce new ones, or reuse existing?
+- [ ] Font family — still the one configured in the project's `next/font` or `@import` setup?
+- [ ] Motion library — still the one in `package.json` (don't swap `framer-motion` → `motion` unprompted)?
+- [ ] Component library — did you use `components/ui/button` (existing), or roll a new `<Button>` when one exists?
+- [ ] Tailwind theme — any changes to `tailwind.config` are red-flagged. Why did you edit it?
+- [ ] Overall look — does the new piece look like a sibling of the existing pieces, or like it arrived from a different product?
+
+**Any drift without explicit user permission** → revert or ask.
 
 ### Multi-device responsive invariants
 - [ ] At least 3 breakpoints handled: mobile (`<640px`), tablet (`640-1024px`), desktop (`>1024px`)
