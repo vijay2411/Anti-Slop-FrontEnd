@@ -1,0 +1,43 @@
+MIT License
+
+Copyright (c) 2026 anti-slop-frontend-pack contributors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---
+
+NOTE ON INCLUDED SKILLS
+
+The seven skills authored by this pack (anti-slop-frontend, motion-dev-animations,
+animate-ui-elements, google-fonts-picker, twenty-first-dev, stitch-workflow,
+webflow-inspiration) are MIT-licensed as above.
+
+The five wrapper SKILL.md files (skillui, webgpu, awesome-design-md,
+ui-ux-pro-max, taste-skill) are also MIT. They describe how to use upstream
+repositories that are cloned at install time. Those upstream repositories
+retain their own licenses - see each repo in sources.json for details:
+
+  - skillui              - see https://github.com/amaancoderx/skillui
+  - webgpu-claude-skill  - see https://github.com/dgreenheck/webgpu-claude-skill
+  - awesome-design-md    - see https://github.com/VoltAgent/awesome-design-md
+  - ui-ux-pro-max-skill  - see https://github.com/nextlevelbuilder/ui-ux-pro-max-skill
+  - taste-skill          - see https://github.com/Leonxlnx/taste-skill
+
+This pack does NOT redistribute upstream code - it only adds wrapper SKILL.md
+files on top of freshly-cloned upstream repos.

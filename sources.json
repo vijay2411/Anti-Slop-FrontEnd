@@ -1,0 +1,35 @@
+{
+  "description": "Upstream repositories cloned by install.sh into ~/.claude/skills/. After each clone, our wrapper SKILL.md from skills/<name>/SKILL.md is copied in at the top level so Claude Code can discover it.",
+  "repos": [
+    {
+      "name": "skillui",
+      "url": "https://github.com/amaancoderx/skillui.git",
+      "author": "amaancoderx",
+      "purpose": "CLI that reverse-engineers any website into a Claude-ready design-system bundle."
+    },
+    {
+      "name": "webgpu",
+      "url": "https://github.com/dgreenheck/webgpu-claude-skill.git",
+      "author": "dgreenheck",
+      "purpose": "Three.js WebGPU + TSL reference for shader-based visuals."
+    },
+    {
+      "name": "awesome-design-md",
+      "url": "https://github.com/VoltAgent/awesome-design-md.git",
+      "author": "VoltAgent",
+      "purpose": "68+ ready-to-use DESIGN.md files captured from real brands."
+    },
+    {
+      "name": "ui-ux-pro-max",
+      "url": "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill.git",
+      "author": "nextlevelbuilder",
+      "purpose": "Design intelligence: 161 product types, 50+ styles, 161 palettes, 57 font pairings."
+    },
+    {
+      "name": "taste-skill",
+      "url": "https://github.com/Leonxlnx/taste-skill.git",
+      "author": "Leonxlnx",
+      "purpose": "High-agency frontend skill encoding anti-slop design philosophy."
+    }
+  ]
+}
