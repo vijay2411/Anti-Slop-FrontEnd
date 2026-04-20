@@ -22,6 +22,7 @@ confirm() {
 
 SKILLS=(
   anti-slop-frontend
+  verify-frontend-render
   motion-dev-animations
   animate-ui-elements
   google-fonts-picker

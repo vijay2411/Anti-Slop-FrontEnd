@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # anti-slop-frontend-pack installer
-# Installs 12 Claude Code skills into ~/.claude/skills/ to produce rich,
-# intentional frontend output and kill AI slop.
+# Installs 13 Claude Code skills into ~/.claude/skills/ to produce rich,
+# intentional frontend output, enforce multi-device + verified rendering,
+# and kill AI slop.
 #
 # Usage:
 #   ./install.sh              # interactive — prompts before removing Anthropic's frontend-design
@@ -95,6 +96,7 @@ done < <(read_sources)
 
 CUSTOM_SKILLS=(
   anti-slop-frontend
+  verify-frontend-render
   motion-dev-animations
   animate-ui-elements
   google-fonts-picker

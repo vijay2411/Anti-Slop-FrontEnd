@@ -2,7 +2,7 @@
 
 > **Stop Claude (and every other coding agent) from shipping purple-gradient, Inter-everywhere, 2×2-bento-card AI slop.**
 
-A Claude Code skills pack that replaces Anthropic's default `frontend-design` with a curated stack of **12 skills** — one mega-router + 11 specialists — that enforce rich, intentional, motion-driven interfaces.
+A Claude Code skills pack that replaces Anthropic's default `frontend-design` with a curated stack of **13 skills** — one mega-router + one render verifier + 11 specialists — that enforce rich, intentional, motion-driven, multi-device, *verified* interfaces.
 
 ```bash
 git clone https://github.com/vijay2411/Anti-Slop-FrontEnd.git
@@ -19,13 +19,18 @@ That's it. Next frontend request you give Claude, the mega-skill fires first and
 **Without this pack** — generic SaaS: purple→pink gradient, Inter for everything, 3 identical feature cards in a bento, `hover:opacity-80`, no motion, no personality.
 
 **With this pack** — every frontend task requires:
+- ✅ **Trend research** before anything else (WebSearch + awwwards / godly / land-book pass)
+- ✅ **Dependency receipt** — every lib, token, and asset sourced before the first line of code
 - ✅ A **vibe reference** (from Made-in-Webflow, a named brand, or a Stitch mockup)
 - ✅ A **design system source** (industry-matched palette from 161 options, not default)
+- ✅ **Adventurous colour** — 3+ hues with one unexpected pairing, never "brand colour + grey"
 - ✅ **Motion** (`motion.dev` scroll reveals, stagger, spring physics)
 - ✅ **Animated elements** (from animate-ui.com or 21st.dev)
 - ✅ **Intentional typography** (Google Fonts picked for vibe, **never Inter by default**)
+- ✅ **Multi-device proof** — mobile (375), tablet (768), desktop (1440) all verified
+- ✅ **Rendered verification** via Playwright MCP — console clean, snapshot complete, screenshot inspected
 
-...and the mega-skill auto-rejects drafts containing any of 14 specific slop patterns.
+...and the mega-skill auto-rejects drafts containing any of 26 specific slop patterns.
 
 See a real output in [`demo/reelkit.html`](./demo/reelkit.html) — open it in any browser.
 
@@ -35,6 +40,9 @@ See a real output in [`demo/reelkit.html`](./demo/reelkit.html) — open it in a
 
 ### The mega-skill
 **`anti-slop-frontend`** — Fires on any frontend request. Routes by vibe to the right specialist, enforces 5 non-negotiables, hard-blocks 14 slop patterns, ships a rationalization table so the agent can't excuse its way around the rules.
+
+### The verifier (MANDATORY final step)
+**`verify-frontend-render`** — Runs a 3-phase hard check after code generation, BEFORE claiming done: (1) dependency receipt, (2) post-write structural self-audit (imports / CSS vars / responsive invariants / flex guards / grid math), (3) Playwright MCP browser pass — navigate, wait, console check, network check, accessibility snapshot, full-page screenshot, resize to 375/768/1440 and re-verify. Blocks "here's the page" claims until every check passes.
 
 ### Reference skills (authored here, MIT-licensed)
 | Skill | What it covers |
@@ -146,7 +154,7 @@ Removes all 12 skill directories. Does **not** restore Anthropic's `frontend-des
 
 ---
 
-## The 14-pattern slop blocklist
+## The 26-pattern slop blocklist
 
 The mega-skill rejects any draft containing:
 
@@ -164,6 +172,17 @@ The mega-skill rejects any draft containing:
 - Shadcn components pasted unmodified with default colors
 - Lucide icons at default stroke + size everywhere
 - `<hr />` as section separators
+- "Brand colour + grey" as entire palette (monochrome = 2019)
+- Single gradient stamped on every heading
+- All accents from same hue family (all blues / all oranges)
+- Desktop-only UI — no mobile breakpoint ever written
+- `overflow-x: hidden` on `<body>` to mask mobile overflow
+- Fixed-width element that clips at 375px
+- Nav collapses to nothing at mobile (no hamburger/drawer)
+- Touch target smaller than 44×44 on mobile
+- Body text < 16px on mobile inputs (triggers iOS zoom)
+- Claimed "done" without invoking `verify-frontend-render`
+- "Probably renders fine" reasoning without a screenshot
 
 ---
 
