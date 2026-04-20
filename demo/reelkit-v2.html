@@ -1,0 +1,1315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>ReelKit — Stop rewatching. Start recreating.</title>
+<meta name="description" content="ReelKit dissects any Instagram Reel into its raw tracks — video, BGM, SFX, and voice — stored in a searchable vault, export-ready for CapCut, Premiere, and Resolve." />
+
+<!--
+  Trends noted (April 2026): asymmetric editorial grids, warm-toned OLED darks,
+  variable-weight serif italics used mid-sentence, scroll-pinned reveals,
+  acid-on-warm-black palettes, scrolling ticker marquees, spot-color accents
+  over noise-grain backgrounds. Refs: awwwards / godly.website / land-book April 2026.
+  Vibe: editorial creator-tool magazine — think Linear's density meets a print mag.
+  Taking: italic-mid-sentence display headings + acid/peach pop against warm black.
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    /* Strict dual palette — yellow + black only. Neutrals are shades of black. */
+    --bg:          #0a0908;
+    --bg-elev:     #14120f;
+    --bg-card:     #1a1714;
+    --ink:         #f4f0e2;
+    --ink-dim:     #a29a87;
+    --ink-mute:    #5c554a;
+    --yellow:      #ffd60a;
+    --yellow-deep: #d4b000;
+    --yellow-soft: rgba(255, 214, 10, 0.14);
+    --border:      rgba(244, 240, 226, 0.08);
+    --border-bold: rgba(244, 240, 226, 0.18);
+
+    /* Type */
+    --display: 'Fraunces', ui-serif, Georgia, serif;
+    --sans:    'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+    --mono:    'JetBrains Mono', ui-monospace, monospace;
+
+    /* Spacing scale */
+    --gutter: clamp(20px, 4vw, 48px);
+    --rail:   min(1280px, 100%);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.55;
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overflow-x: clip;
+    min-height: 100vh;
+    position: relative;
+  }
+
+  /* --- Background layer: gradient blobs + noise grain --- */
+  .bg-layer {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .bg-blob {
+    position: absolute;
+    filter: blur(120px);
+    opacity: 0.35;
+    border-radius: 50%;
+    will-change: transform;
+  }
+  .bg-blob--plum {
+    width: 60vw; height: 60vw;
+    top: -15vw; right: -10vw;
+    background: radial-gradient(circle, rgba(255, 214, 10, 0.14) 0%, transparent 70%);
+    opacity: 1;
+  }
+  .bg-blob--peach {
+    width: 50vw; height: 50vw;
+    bottom: -20vw; left: -10vw;
+    background: radial-gradient(circle, var(--yellow) 0%, transparent 65%);
+    opacity: 0.10;
+  }
+  .bg-blob--acid {
+    width: 30vw; height: 30vw;
+    top: 45%; left: 55%;
+    background: radial-gradient(circle, var(--yellow) 0%, transparent 70%);
+    opacity: 0.06;
+  }
+  .bg-noise {
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.95 0 0 0 0 0.91 0 0 0 0 0.86 0 0 0 0.35 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/></svg>");
+    opacity: 0.35;
+    mix-blend-mode: overlay;
+  }
+
+  /* --- Layout rails --- */
+  .rail {
+    width: var(--rail);
+    margin-inline: auto;
+    padding-inline: var(--gutter);
+  }
+
+  /* --- Nav --- */
+  nav.top {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    backdrop-filter: blur(18px) saturate(130%);
+    -webkit-backdrop-filter: blur(18px) saturate(130%);
+    background: rgba(13, 11, 9, 0.65);
+    border-bottom: 1px solid var(--border);
+  }
+  nav.top .rail {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-block: 18px;
+  }
+  .brand {
+    display: flex; align-items: center; gap: 10px;
+    text-decoration: none; color: var(--ink);
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 21px;
+    letter-spacing: -0.02em;
+  }
+  .brand-mark {
+    width: 26px; height: 26px;
+    display: grid; place-items: center;
+    background: var(--yellow);
+    color: var(--bg);
+    border-radius: 7px;
+    font-family: var(--mono);
+    font-weight: 500;
+    font-size: 14px;
+  }
+  .brand em { font-style: italic; color: var(--yellow); font-weight: 400; }
+  .nav-links {
+    display: flex; gap: 32px;
+    font-size: 14px;
+    color: var(--ink-dim);
+  }
+  .nav-links a {
+    color: inherit; text-decoration: none;
+    transition: color 220ms ease;
+  }
+  .nav-links a:hover { color: var(--ink); }
+  .nav-cta {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 18px;
+    background: var(--ink);
+    color: var(--bg);
+    text-decoration: none;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: transform 220ms ease, background 220ms ease;
+  }
+  .nav-cta:hover { background: var(--yellow); transform: translateY(-1px); }
+  .nav-toggle {
+    display: none;
+    background: none; border: none; color: var(--ink);
+    padding: 8px;
+    cursor: pointer;
+  }
+  .nav-toggle svg { display: block; }
+
+  /* nav-drawer hidden by default on desktop; reopened at <=720px via media query */
+  .nav-drawer { display: none; }
+
+  /* --- Hero --- */
+  .hero {
+    padding-block: clamp(60px, 10vh, 120px) clamp(80px, 14vh, 140px);
+  }
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1.15fr 1fr;
+    gap: clamp(40px, 6vw, 80px);
+    align-items: center;
+  }
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--yellow);
+    display: inline-flex; align-items: center; gap: 10px;
+    margin-bottom: 28px;
+  }
+  .eyebrow::before {
+    content: '';
+    width: 24px; height: 1px;
+    background: var(--yellow);
+  }
+  .hero h1 {
+    font-family: var(--display);
+    font-weight: 400;
+    font-size: clamp(44px, 7.5vw, 96px);
+    line-height: 0.98;
+    letter-spacing: -0.035em;
+    color: var(--ink);
+  }
+  .hero h1 em {
+    font-style: italic;
+    font-weight: 300;
+    font-variation-settings: "opsz" 144;
+    color: var(--yellow);
+  }
+  .hero h1 .word-reveal {
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: bottom;
+  }
+  .hero h1 .word-reveal > span {
+    display: inline-block;
+    transform: translateY(110%);
+  }
+  .hero p.lead {
+    margin-top: 32px;
+    font-size: clamp(17px, 1.35vw, 19px);
+    line-height: 1.5;
+    color: var(--ink-dim);
+    max-width: 540px;
+  }
+  .hero-ctas {
+    margin-top: 40px;
+    display: flex; flex-wrap: wrap; gap: 14px;
+  }
+  .btn {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 14px 24px;
+    border-radius: 999px;
+    font-size: 15px;
+    font-weight: 500;
+    text-decoration: none;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: transform 240ms cubic-bezier(.2,.8,.2,1), background 240ms ease, border-color 240ms ease;
+  }
+  .btn-primary {
+    background: var(--yellow);
+    color: var(--bg);
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+  }
+  .btn-primary::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.5) 50%, transparent 70%);
+    transform: translateX(-100%);
+    transition: transform 720ms cubic-bezier(.2,.8,.2,1);
+    z-index: -1;
+  }
+  .btn-primary:hover { transform: translateY(-2px); }
+  .btn-primary:hover::after { transform: translateX(100%); }
+  .btn-ghost {
+    background: transparent;
+    color: var(--ink);
+    border-color: var(--border-bold);
+  }
+  .btn-ghost:hover { border-color: var(--ink); transform: translateY(-2px); }
+  .btn .arrow { transition: transform 240ms ease; }
+  .btn:hover .arrow { transform: translateX(3px); }
+
+  /* Hero visual — reel dissection diagram */
+  .reel-dissect {
+    position: relative;
+    padding: 22px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    backdrop-filter: blur(8px);
+  }
+  .reel-dissect::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: 24px;
+    padding: 1px;
+    background: linear-gradient(140deg, rgba(255,214,10,0.4), transparent 40%, rgba(255,214,10,0.3));
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+            mask-composite: exclude;
+    pointer-events: none;
+  }
+  .reel-head {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 18px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink-mute);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .reel-head .dot-row { display: flex; gap: 6px; }
+  .reel-head .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ink-mute); opacity: 0.5; }
+  .reel-source {
+    display: flex; gap: 16px; align-items: center;
+    padding: 14px;
+    border-radius: 14px;
+    background: var(--bg-elev);
+    margin-bottom: 14px;
+  }
+  .reel-thumb {
+    width: 72px; height: 96px;
+    border-radius: 10px;
+    background: linear-gradient(160deg, var(--plum) 0%, var(--yellow) 60%, var(--yellow) 120%);
+    position: relative;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+  .reel-thumb::after {
+    content: '▶';
+    position: absolute;
+    inset: 0;
+    display: grid; place-items: center;
+    color: rgba(13,11,9,0.85);
+    font-size: 22px;
+  }
+  .reel-source-meta .url {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--ink-dim);
+    margin-bottom: 6px;
+  }
+  .reel-source-meta .title {
+    font-family: var(--display);
+    font-size: 18px;
+    font-weight: 500;
+    line-height: 1.2;
+  }
+  .reel-arrow {
+    display: flex; justify-content: center;
+    color: var(--yellow);
+    font-family: var(--mono); font-size: 11px;
+    letter-spacing: 0.2em;
+    margin: 10px 0 14px;
+  }
+  .reel-tracks { display: grid; gap: 8px; }
+  .track {
+    display: grid;
+    grid-template-columns: 34px 100px 1fr 56px;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 14px;
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    transition: border-color 220ms ease, background 220ms ease, transform 220ms ease;
+  }
+  .track:hover {
+    border-color: var(--border-bold);
+    transform: translateX(2px);
+  }
+  .track .track-icon {
+    width: 34px; height: 34px;
+    border-radius: 9px;
+    display: grid; place-items: center;
+    font-size: 15px;
+  }
+  .track-icon--video { background: rgba(255,214,10,0.12); color: var(--yellow); }
+  .track-icon--music { background: rgba(255,214,10,0.12); color: var(--yellow); }
+  .track-icon--sfx   { background: rgba(85,42,115,0.35); color: #c09fdd; }
+  .track-icon--voice { background: rgba(242,233,220,0.08); color: var(--ink); }
+  .track .track-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink);
+  }
+  .track .track-label small {
+    display: block;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--ink-mute);
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+  .waveform {
+    display: flex; align-items: center; gap: 2px; height: 28px;
+  }
+  .waveform span {
+    display: block;
+    flex: 1;
+    background: currentColor;
+    border-radius: 1px;
+    opacity: 0.65;
+  }
+  .track-duration {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink-dim);
+    text-align: right;
+  }
+
+  /* --- Section scaffolding --- */
+  section { padding-block: clamp(70px, 11vh, 130px); position: relative; }
+  .section-head {
+    display: flex; justify-content: space-between; align-items: end;
+    gap: 40px;
+    margin-bottom: clamp(40px, 5vw, 72px);
+    flex-wrap: wrap;
+  }
+  .section-title {
+    font-family: var(--display);
+    font-weight: 400;
+    font-size: clamp(34px, 4.6vw, 60px);
+    line-height: 1.02;
+    letter-spacing: -0.025em;
+    max-width: 18ch;
+  }
+  .section-title em {
+    font-style: italic;
+    font-weight: 300;
+    color: var(--yellow);
+  }
+  .section-kicker {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+    margin-bottom: 18px;
+  }
+  .section-aside {
+    font-size: 15px;
+    color: var(--ink-dim);
+    max-width: 340px;
+    line-height: 1.55;
+  }
+
+  /* --- Problem section (editorial pull-quote) --- */
+  .problem {
+    border-top: 1px solid var(--border);
+  }
+  .problem-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.25fr;
+    gap: clamp(24px, 5vw, 80px);
+  }
+  .problem-col-left {
+    padding-top: 12px;
+  }
+  .problem-stat {
+    font-family: var(--display);
+    font-size: clamp(64px, 9vw, 120px);
+    line-height: 0.95;
+    font-weight: 300;
+    letter-spacing: -0.04em;
+    color: var(--yellow);
+  }
+  .problem-stat-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+    margin-top: 12px;
+    max-width: 26ch;
+    line-height: 1.6;
+  }
+  .problem-body {
+    font-family: var(--display);
+    font-weight: 300;
+    font-size: clamp(22px, 2.4vw, 34px);
+    line-height: 1.3;
+    color: var(--ink);
+    letter-spacing: -0.015em;
+  }
+  .problem-body em {
+    font-style: italic;
+    color: var(--yellow);
+    font-weight: 400;
+  }
+  .problem-body .highlight {
+    background: linear-gradient(180deg, transparent 62%, rgba(255,214,10,0.28) 62%);
+    padding-inline: 2px;
+    font-style: normal;
+  }
+
+  /* --- How it works (numbered timeline) --- */
+  .how {
+    border-top: 1px solid var(--border);
+    background:
+      radial-gradient(ellipse at 85% 0%, rgba(85,42,115,0.12) 0%, transparent 60%),
+      transparent;
+  }
+  .how-list {
+    display: grid;
+    gap: 2px;
+    border-top: 1px solid var(--border);
+  }
+  .how-step {
+    display: grid;
+    grid-template-columns: 120px 1fr 1.1fr;
+    gap: clamp(20px, 4vw, 60px);
+    align-items: baseline;
+    padding-block: clamp(28px, 4vh, 44px);
+    border-bottom: 1px solid var(--border);
+    transition: background 320ms ease;
+  }
+  .how-step:hover { background: rgba(255,214,10,0.02); }
+  .how-num {
+    font-family: var(--mono);
+    font-size: 13px;
+    letter-spacing: 0.12em;
+    color: var(--yellow);
+  }
+  .how-title {
+    font-family: var(--display);
+    font-size: clamp(22px, 2.4vw, 30px);
+    font-weight: 400;
+    letter-spacing: -0.015em;
+    line-height: 1.15;
+  }
+  .how-body {
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--ink-dim);
+  }
+
+  /* --- Feature collage (asymmetric, NOT a bento grid) --- */
+  .features {
+    border-top: 1px solid var(--border);
+  }
+  .feat-grid {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 1fr;
+    grid-template-rows: auto auto;
+    gap: 18px;
+  }
+  .feat {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 28px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 320ms ease, transform 320ms ease;
+    will-change: transform;
+  }
+  .feat:hover {
+    border-color: var(--border-bold);
+    transform: translateY(-3px);
+  }
+  .feat--hero {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+    background:
+      linear-gradient(165deg, rgba(255,214,10,0.08) 0%, transparent 50%),
+      var(--bg-card);
+    padding: clamp(28px, 3.5vw, 44px);
+    display: flex; flex-direction: column; gap: 28px;
+  }
+  .feat--wide {
+    grid-column: 2 / span 2;
+    grid-row: 1;
+  }
+  .feat--c {
+    grid-column: 2;
+    grid-row: 2;
+  }
+  .feat--d {
+    grid-column: 3;
+    grid-row: 2;
+  }
+  .feat-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+    margin-bottom: 14px;
+  }
+  .feat h3 {
+    font-family: var(--display);
+    font-weight: 400;
+    font-size: clamp(22px, 2.2vw, 28px);
+    letter-spacing: -0.02em;
+    line-height: 1.12;
+    margin-bottom: 12px;
+  }
+  .feat h3 em { font-style: italic; color: var(--yellow); font-weight: 300; }
+  .feat p {
+    font-size: 14.5px;
+    color: var(--ink-dim);
+    line-height: 1.6;
+  }
+  .feat-visual {
+    margin-top: auto;
+    padding-top: 22px;
+    display: flex; flex-wrap: wrap; gap: 8px;
+  }
+  .chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 12px;
+    border-radius: 999px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    background: rgba(242,233,220,0.05);
+    border: 1px solid var(--border);
+    color: var(--ink-dim);
+  }
+  .chip .chip-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--yellow);
+  }
+  .chip--peach .chip-dot { background: var(--yellow); }
+  .chip--plum .chip-dot  { background: #c09fdd; }
+
+  /* --- Moodboard preview within feature card --- */
+  .moodboard {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    margin-top: 18px;
+  }
+  .moodboard div {
+    aspect-ratio: 3/4;
+    border-radius: 8px;
+    background-size: cover;
+    background-position: center;
+  }
+  .moodboard div:nth-child(1) { background: linear-gradient(150deg, var(--yellow), var(--plum)); }
+  .moodboard div:nth-child(2) { background: linear-gradient(150deg, var(--yellow), #2a4b0e); }
+  .moodboard div:nth-child(3) { background: linear-gradient(150deg, var(--plum-deep), var(--yellow)); }
+  .moodboard div:nth-child(4) { background: linear-gradient(150deg, #4a2a1f, var(--yellow)); }
+  .moodboard div:nth-child(5) { background: linear-gradient(150deg, #1d1a3b, var(--acid-deep)); }
+  .moodboard div:nth-child(6) { background: linear-gradient(150deg, #0e3a2c, #7aa95a); }
+
+  /* --- Marquee --- */
+  .marquee-section {
+    padding-block: 60px;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    overflow: hidden;
+    background: var(--bg);
+  }
+  .marquee-head {
+    text-align: center;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+    margin-bottom: 34px;
+  }
+  .marquee {
+    display: flex;
+    gap: 60px;
+    width: max-content;
+    animation: scroll 32s linear infinite;
+  }
+  .marquee-wrap { overflow: hidden; mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent); }
+  .marquee-wrap:hover .marquee { animation-play-state: paused; }
+  @keyframes scroll {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+  .marquee-item {
+    font-family: var(--display);
+    font-weight: 400;
+    font-size: clamp(22px, 2.6vw, 30px);
+    color: var(--ink-dim);
+    letter-spacing: -0.02em;
+    display: flex; align-items: center; gap: 18px;
+    white-space: nowrap;
+  }
+  .marquee-item em {
+    color: var(--yellow);
+    font-style: italic;
+    font-weight: 300;
+  }
+  .marquee-item::after {
+    content: '◆';
+    font-size: 10px;
+    color: var(--ink-mute);
+    opacity: 0.6;
+  }
+
+  /* --- Stats --- */
+  .stats {
+    border-top: 1px solid var(--border);
+  }
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    border-top: 1px solid var(--border);
+  }
+  .stat-cell {
+    padding-block: clamp(36px, 5vw, 64px);
+    padding-right: 32px;
+    border-bottom: 1px solid var(--border);
+  }
+  .stat-cell + .stat-cell { border-left: 1px solid var(--border); padding-left: 32px; }
+  .stat-num {
+    font-family: var(--display);
+    font-size: clamp(50px, 7vw, 96px);
+    font-weight: 300;
+    line-height: 1;
+    letter-spacing: -0.04em;
+    color: var(--ink);
+    display: flex; align-items: baseline;
+  }
+  .stat-num .unit {
+    font-size: 0.35em;
+    color: var(--yellow);
+    margin-left: 8px;
+    font-style: italic;
+    font-weight: 400;
+  }
+  .stat-label {
+    margin-top: 12px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+  }
+
+  /* --- CTA --- */
+  .final {
+    border-top: 1px solid var(--border);
+    text-align: center;
+    padding-block: clamp(80px, 14vh, 160px);
+    position: relative;
+  }
+  .final::before {
+    content: '';
+    position: absolute;
+    left: 50%; top: 10%;
+    transform: translateX(-50%);
+    width: 70vw; height: 70vw; max-width: 800px; max-height: 800px;
+    background: radial-gradient(circle, rgba(255,214,10,0.09) 0%, transparent 55%);
+    filter: blur(60px);
+    pointer-events: none;
+  }
+  .final h2 {
+    font-family: var(--display);
+    font-weight: 400;
+    font-size: clamp(48px, 7.5vw, 96px);
+    line-height: 0.98;
+    letter-spacing: -0.035em;
+    max-width: 14ch;
+    margin-inline: auto;
+    position: relative;
+  }
+  .final h2 em {
+    font-style: italic; color: var(--yellow); font-weight: 300;
+  }
+  .final p {
+    margin-top: 24px;
+    font-size: 17px;
+    color: var(--ink-dim);
+    max-width: 52ch;
+    margin-inline: auto;
+    position: relative;
+  }
+  .final .hero-ctas {
+    justify-content: center;
+    margin-top: 36px;
+    position: relative;
+  }
+
+  /* --- Footer --- */
+  footer {
+    border-top: 1px solid var(--border);
+    padding-block: 42px;
+    font-size: 13px;
+    color: var(--ink-mute);
+  }
+  footer .rail {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap; gap: 20px;
+  }
+  footer .foot-links {
+    display: flex; gap: 24px;
+  }
+  footer .foot-links a {
+    color: var(--ink-dim);
+    text-decoration: none;
+    transition: color 220ms ease;
+  }
+  footer .foot-links a:hover { color: var(--ink); }
+
+  /* --- Scroll reveal: default state is fully visible so content is never hidden
+         if JS is blocked, slow, or a screenshot tool skips observer callbacks.
+         When JS adds .is-in, we replay a brief entrance animation. --- */
+  @keyframes reveal-in {
+    from { opacity: 0; transform: translateY(28px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  html.js [data-reveal].is-in {
+    animation: reveal-in 900ms cubic-bezier(.2,.8,.2,1) both;
+  }
+
+  /* --- Responsive --- */
+  @media (max-width: 1024px) {
+    .hero-grid { grid-template-columns: 1fr; gap: 60px; }
+    .reel-dissect { max-width: 560px; }
+    .problem-grid { grid-template-columns: 1fr; gap: 40px; }
+    .how-step { grid-template-columns: 80px 1fr; }
+    .how-step .how-body { grid-column: 2; margin-top: 8px; }
+    .feat-grid {
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: auto;
+    }
+    .feat--hero { grid-column: 1 / span 2; grid-row: auto; }
+    .feat--wide { grid-column: 1 / span 2; grid-row: auto; }
+    .feat--c, .feat--d { grid-column: auto; grid-row: auto; }
+  }
+
+  @media (max-width: 720px) {
+    :root { --gutter: 18px; }
+    .nav-links, .nav-cta { display: none; }
+    .nav-toggle { display: inline-flex; }
+    .nav-drawer {
+      display: none;
+      flex-direction: column;
+      gap: 4px;
+      padding: 18px var(--gutter) 24px;
+      border-top: 1px solid var(--border);
+      background: rgba(13,11,9,0.96);
+    }
+    .nav-drawer.open { display: flex; }
+    .nav-drawer a {
+      display: block;
+      padding: 14px 0;
+      color: var(--ink);
+      text-decoration: none;
+      font-size: 17px;
+      border-bottom: 1px solid var(--border);
+      min-height: 44px;
+    }
+    .nav-drawer .btn { margin-top: 12px; width: 100%; justify-content: center; min-height: 48px; }
+
+    .hero { padding-block: 60px 80px; }
+    .section-head { flex-direction: column; align-items: flex-start; gap: 16px; }
+    .section-aside { max-width: none; }
+
+    .problem-stat { font-size: 84px; }
+
+    .how-step {
+      grid-template-columns: 1fr;
+      gap: 10px;
+      padding-block: 28px;
+    }
+    .how-num { font-size: 12px; }
+
+    .feat-grid { grid-template-columns: 1fr; }
+    .feat--hero, .feat--wide, .feat--c, .feat--d { grid-column: auto; grid-row: auto; }
+
+    .stats-grid { grid-template-columns: 1fr; }
+    .stat-cell + .stat-cell { border-left: none; padding-left: 0; }
+
+    .track {
+      grid-template-columns: 30px 1fr 52px;
+      gap: 10px;
+      padding: 10px 12px;
+    }
+    .track .waveform { display: none; }
+
+    .reel-dissect { padding: 16px; }
+
+    .btn { min-height: 48px; padding: 14px 22px; }
+
+    footer .rail { flex-direction: column; text-align: center; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+    [data-reveal] { opacity: 1; transform: none; }
+    .marquee { animation: none; }
+  }
+</style>
+</head>
+
+<body>
+
+<div class="bg-layer" aria-hidden="true">
+  <div class="bg-blob bg-blob--plum"></div>
+  <div class="bg-blob bg-blob--peach"></div>
+  <div class="bg-blob bg-blob--acid"></div>
+  <div class="bg-noise"></div>
+</div>
+
+<nav class="top">
+  <div class="rail">
+    <a href="#" class="brand">
+      <span class="brand-mark">R</span>
+      Reel<em>Kit</em>
+    </a>
+    <div class="nav-links">
+      <a href="#how">How it works</a>
+      <a href="#features">Features</a>
+      <a href="#integrations">Integrations</a>
+      <a href="#">Changelog</a>
+    </div>
+    <a href="#cta" class="nav-cta">Get early access <span class="arrow">↗</span></a>
+    <button class="nav-toggle" aria-label="Open menu" id="navToggle">
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M3 6h16M3 11h16M3 16h16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+  <div class="nav-drawer" id="navDrawer">
+    <a href="#how">How it works</a>
+    <a href="#features">Features</a>
+    <a href="#integrations">Integrations</a>
+    <a href="#">Changelog</a>
+    <a href="#cta" class="btn btn-primary">Get early access <span class="arrow">↗</span></a>
+  </div>
+</nav>
+
+<!-- ============ HERO ============ -->
+<header class="hero">
+  <div class="rail">
+    <div class="hero-grid">
+      <div>
+        <div class="eyebrow" data-reveal>Creative asset library · Closed beta</div>
+        <h1 data-reveal>
+          Stop rewatching.<br/>
+          Start <em>recreating.</em>
+        </h1>
+        <p class="lead" data-reveal>
+          ReelKit dissects any Instagram Reel into its raw tracks — the video cuts, the BGM, the SFX, and the creator's voice — then files them into a searchable vault you can actually build from.
+        </p>
+        <div class="hero-ctas" data-reveal>
+          <a href="#cta" class="btn btn-primary">Forward your first reel <span class="arrow">→</span></a>
+          <a href="#how" class="btn btn-ghost">See how it works</a>
+        </div>
+      </div>
+
+      <div class="reel-dissect" data-reveal aria-hidden="true">
+        <div class="reel-head">
+          <span>reelkit.inbox/01</span>
+          <div class="dot-row"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+        </div>
+
+        <div class="reel-source">
+          <div class="reel-thumb"></div>
+          <div class="reel-source-meta">
+            <div class="url">instagram.com/reel/C8q...</div>
+            <div class="title">Golden-hour street<br/>transition · 27s</div>
+          </div>
+        </div>
+
+        <div class="reel-arrow">↓ extracting tracks ↓</div>
+
+        <div class="reel-tracks">
+          <div class="track" data-track="video">
+            <div class="track-icon track-icon--video">▦</div>
+            <div class="track-label">Video cuts <small>4 clips</small></div>
+            <div class="waveform" style="color: var(--yellow);">
+              <span style="height: 40%"></span><span style="height: 70%"></span><span style="height: 55%"></span><span style="height: 88%"></span><span style="height: 62%"></span><span style="height: 74%"></span><span style="height: 45%"></span><span style="height: 90%"></span><span style="height: 60%"></span><span style="height: 35%"></span><span style="height: 72%"></span><span style="height: 48%"></span>
+            </div>
+            <div class="track-duration">00:27</div>
+          </div>
+
+          <div class="track" data-track="music">
+            <div class="track-icon track-icon--music">♪</div>
+            <div class="track-label">Background music <small>matched · 94%</small></div>
+            <div class="waveform" style="color: var(--yellow);">
+              <span style="height: 55%"></span><span style="height: 72%"></span><span style="height: 68%"></span><span style="height: 84%"></span><span style="height: 48%"></span><span style="height: 78%"></span><span style="height: 92%"></span><span style="height: 58%"></span><span style="height: 66%"></span><span style="height: 74%"></span><span style="height: 52%"></span><span style="height: 80%"></span>
+            </div>
+            <div class="track-duration">00:27</div>
+          </div>
+
+          <div class="track" data-track="sfx">
+            <div class="track-icon track-icon--sfx">✦</div>
+            <div class="track-label">SFX <small>3 stingers · whoosh × 2</small></div>
+            <div class="waveform" style="color: #c09fdd;">
+              <span style="height: 20%"></span><span style="height: 95%"></span><span style="height: 25%"></span><span style="height: 18%"></span><span style="height: 88%"></span><span style="height: 30%"></span><span style="height: 20%"></span><span style="height: 25%"></span><span style="height: 92%"></span><span style="height: 22%"></span><span style="height: 28%"></span><span style="height: 18%"></span>
+            </div>
+            <div class="track-duration">00:08</div>
+          </div>
+
+          <div class="track" data-track="voice">
+            <div class="track-icon track-icon--voice">◉</div>
+            <div class="track-label">Creator voice <small>auto-transcribed</small></div>
+            <div class="waveform" style="color: var(--ink);">
+              <span style="height: 40%"></span><span style="height: 62%"></span><span style="height: 48%"></span><span style="height: 70%"></span><span style="height: 55%"></span><span style="height: 44%"></span><span style="height: 66%"></span><span style="height: 50%"></span><span style="height: 72%"></span><span style="height: 58%"></span><span style="height: 42%"></span><span style="height: 64%"></span>
+            </div>
+            <div class="track-duration">00:19</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ============ PROBLEM ============ -->
+<section class="problem">
+  <div class="rail">
+    <div class="section-head" data-reveal>
+      <div>
+        <div class="section-kicker">The friction we're killing</div>
+        <h2 class="section-title">You've saved <em>hundreds</em> of reels. You can't use <em>any</em> of them.</h2>
+      </div>
+      <p class="section-aside">
+        Every creator's saved folder is a graveyard of vibes they meant to recreate. The assets are there — just locked inside the video.
+      </p>
+    </div>
+
+    <div class="problem-grid">
+      <div class="problem-col-left" data-reveal>
+        <div class="problem-stat" data-count data-target="15">0</div>
+        <div class="problem-stat-label">average times a creator will rewatch one reel trying to reverse-engineer a vibe — before giving up and making something worse.</div>
+      </div>
+      <div class="problem-body" data-reveal>
+        You save a Reel because the <em>BGM hits</em>. Or the pan-cut <em>slaps</em>. Or the hook delivery has that specific, unfakeable energy.<br/><br/>
+        Then you sit down to make your own and realise the assets are <span class="highlight">trapped inside someone else's video.</span> You hunt the track on Shazam, rewatch the cut 15 times, eyeball the transition. You never actually get the vibe.<br/><br/>
+        ReelKit collapses all of that into a forward.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ HOW IT WORKS ============ -->
+<section class="how" id="how">
+  <div class="rail">
+    <div class="section-head" data-reveal>
+      <div>
+        <div class="section-kicker">How it works</div>
+        <h2 class="section-title">Forward a reel. Get a <em>vault.</em></h2>
+      </div>
+      <p class="section-aside">
+        Four steps, under 30 seconds from DM to dissected. No timeline scrubbing, no Shazam tabs, no transcription copy-paste.
+      </p>
+    </div>
+
+    <div class="how-list">
+      <div class="how-step" data-reveal>
+        <div class="how-num">— 01</div>
+        <div class="how-title">Forward or paste the link</div>
+        <div class="how-body">DM the Reel to @reelkit on Instagram, or drop the URL into the dashboard. TikTok and YouTube Shorts land next month.</div>
+      </div>
+      <div class="how-step" data-reveal>
+        <div class="how-num">— 02</div>
+        <div class="how-title">We separate the four tracks</div>
+        <div class="how-body">Our models isolate the video, the BGM (matched against a commercial library), the SFX stingers, and the creator's speech — each as a standalone, scrubbable file.</div>
+      </div>
+      <div class="how-step" data-reveal>
+        <div class="how-num">— 03</div>
+        <div class="how-title">Auto-tag, file, and mood-board</div>
+        <div class="how-body">Every asset lands tagged by mood, tempo, scene, and voice energy. Drop them into mood boards you build per video, per client, or per vibe.</div>
+      </div>
+      <div class="how-step" data-reveal>
+        <div class="how-num">— 04</div>
+        <div class="how-title">Export straight into your NLE</div>
+        <div class="how-body">One-click send to CapCut, Premiere, Resolve, or Final Cut — clips arrive pre-synced with metadata intact, ready to drop on a timeline.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FEATURES ============ -->
+<section class="features" id="features">
+  <div class="rail">
+    <div class="section-head" data-reveal>
+      <div>
+        <div class="section-kicker">Inside the vault</div>
+        <h2 class="section-title">Every asset <em>tagged, previewed, exported.</em></h2>
+      </div>
+      <p class="section-aside">
+        Not a folder of MP3s. A searchable, mood-boarded, NLE-ready library of every creative asset you've ever vibed with.
+      </p>
+    </div>
+
+    <div class="feat-grid">
+      <article class="feat feat--hero" data-reveal>
+        <div>
+          <div class="feat-label">01 · Personal vault</div>
+          <h3>A searchable library of every reel you've ever <em>vibed with.</em></h3>
+          <p>Search "golden-hour slow-pan with a melancholy piano loop" and get every matching asset across every reel you've ever forwarded. Filter by mood, tempo, duration, voice energy, or the creator you clipped it from.</p>
+        </div>
+        <div class="moodboard">
+          <div></div><div></div><div></div><div></div><div></div><div></div>
+        </div>
+        <div class="feat-visual">
+          <span class="chip"><span class="chip-dot"></span> mood: nostalgic</span>
+          <span class="chip chip--peach"><span class="chip-dot"></span> tempo: 92 bpm</span>
+          <span class="chip chip--plum"><span class="chip-dot"></span> voice: low-energy</span>
+        </div>
+      </article>
+
+      <article class="feat feat--wide" data-reveal>
+        <div class="feat-label">02 · Mood boards</div>
+        <h3>Build a board per video. Or per <em>feeling.</em></h3>
+        <p>Drag tracks into named boards — "March launch hero", "Lo-fi recap energy", "That one specific Daniel Schiffer feel". Boards are shareable with collaborators.</p>
+      </article>
+
+      <article class="feat feat--c" data-reveal>
+        <div class="feat-label">03 · Isolated preview</div>
+        <h3>Scrub each track <em>alone.</em></h3>
+        <p>Mute the voice, hear just the BGM. Solo the SFX. Finally understand what's actually making the reel feel the way it does.</p>
+      </article>
+
+      <article class="feat feat--d" data-reveal>
+        <div class="feat-label">04 · One-click export</div>
+        <h3>Send to your <em>editor.</em></h3>
+        <p>Direct send to CapCut, Premiere, Resolve, Final Cut. Metadata, tempo, and tags preserved on the way in.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============ INTEGRATION MARQUEE ============ -->
+<section class="marquee-section" id="integrations" aria-label="Editor integrations">
+  <div class="marquee-head">Exports ready for · editor integrations</div>
+  <div class="marquee-wrap">
+    <div class="marquee" id="marquee">
+      <span class="marquee-item">CapCut</span>
+      <span class="marquee-item"><em>Adobe Premiere</em></span>
+      <span class="marquee-item">DaVinci Resolve</span>
+      <span class="marquee-item">Final Cut Pro</span>
+      <span class="marquee-item"><em>After Effects</em></span>
+      <span class="marquee-item">Descript</span>
+      <span class="marquee-item">Logic Pro</span>
+      <span class="marquee-item"><em>Ableton</em></span>
+      <!-- duplicated for seamless loop -->
+      <span class="marquee-item">CapCut</span>
+      <span class="marquee-item"><em>Adobe Premiere</em></span>
+      <span class="marquee-item">DaVinci Resolve</span>
+      <span class="marquee-item">Final Cut Pro</span>
+      <span class="marquee-item"><em>After Effects</em></span>
+      <span class="marquee-item">Descript</span>
+      <span class="marquee-item">Logic Pro</span>
+      <span class="marquee-item"><em>Ableton</em></span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ STATS ============ -->
+<section class="stats">
+  <div class="rail">
+    <div class="section-head" data-reveal>
+      <div>
+        <div class="section-kicker">Early beta telemetry</div>
+        <h2 class="section-title">Closed beta, <em>loud numbers.</em></h2>
+      </div>
+      <p class="section-aside">Numbers from 1,200 creators forwarding reels through the closed beta since December 2025.</p>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-cell" data-reveal>
+        <div class="stat-num"><span data-count data-target="94">0</span><span class="unit">% match</span></div>
+        <div class="stat-label">BGM identification accuracy across 280k forwarded reels.</div>
+      </div>
+      <div class="stat-cell" data-reveal>
+        <div class="stat-num"><span data-count data-target="22">0</span><span class="unit">sec</span></div>
+        <div class="stat-label">median time from DM-forward to fully dissected vault entry.</div>
+      </div>
+      <div class="stat-cell" data-reveal>
+        <div class="stat-num"><span data-count data-target="7">0</span><span class="unit">×</span></div>
+        <div class="stat-label">faster than rewatching a reference reel to reverse-engineer the vibe.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FINAL CTA ============ -->
+<section class="final" id="cta">
+  <div class="rail">
+    <div class="eyebrow" style="justify-content: center; display: flex;" data-reveal>Closed beta · 1,200 creators in</div>
+    <h2 data-reveal>Turn your saved folder into an <em>arsenal.</em></h2>
+    <p data-reveal>Drop your IG handle — we'll text you a forward-link the moment your slot opens. No credit card, no onboarding call, no launch-waitlist-theatre.</p>
+    <div class="hero-ctas" data-reveal>
+      <a href="#" class="btn btn-primary">Claim your early-access slot <span class="arrow">→</span></a>
+      <a href="#" class="btn btn-ghost">Watch a 40-sec demo</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="rail">
+    <div>© 2026 ReelKit Labs · Built for creators who ship weekly.</div>
+    <div class="foot-links">
+      <a href="#">Twitter</a>
+      <a href="#">Instagram</a>
+      <a href="#">Privacy</a>
+      <a href="#">Terms</a>
+    </div>
+  </div>
+</footer>
+
+<script type="module">
+  // Motion One — vanilla JS port of motion.dev. Not framer-motion.
+  import { animate, inView, stagger } from "https://cdn.jsdelivr.net/npm/motion@11.11.17/+esm";
+
+  // Flag JS-booted so reveal-opacity CSS rules apply (no-JS users see content immediately)
+  document.documentElement.classList.add('js');
+
+  // --- Scroll-triggered reveal — synchronous rAF-driven check so it fires reliably
+  // during scroll, deep-link loads, and headless screenshot tools (IntersectionObserver
+  // can miss frames during Playwright full-page captures).
+  const revealEls = document.querySelectorAll('[data-reveal]');
+  let ticking = false;
+  function revealInView() {
+    ticking = false;
+    const vh = window.innerHeight;
+    revealEls.forEach(el => {
+      if (el.classList.contains('is-in')) return;
+      const rect = el.getBoundingClientRect();
+      if (rect.top < vh * 0.92 && rect.bottom > 0) el.classList.add('is-in');
+    });
+  }
+  function onScroll() {
+    if (!ticking) { requestAnimationFrame(revealInView); ticking = true; }
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll, { passive: true });
+  window.addEventListener('load', revealInView);
+  revealInView();
+
+  // --- Hero headline: letter-level entrance via Motion One (richer than CSS)
+  const heroH1 = document.querySelector('.hero h1');
+  if (heroH1 && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    animate(
+      heroH1,
+      { opacity: [0, 1], transform: ['translateY(22px)', 'translateY(0px)'] },
+      { duration: 0.9, easing: [0.2, 0.8, 0.2, 1], delay: 0.1 }
+    );
+  }
+
+  // --- Hero reel-dissect tracks: staggered entrance
+  const tracks = document.querySelectorAll('.reel-dissect .track');
+  if (tracks.length && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    animate(
+      tracks,
+      { opacity: [0, 1], transform: ['translateX(20px)', 'translateX(0px)'] },
+      { duration: 0.7, easing: [0.2, 0.8, 0.2, 1], delay: stagger(0.12, { start: 0.5 }) }
+    );
+  }
+
+  // --- Animated waveform breathing (subtle)
+  const waveSpans = document.querySelectorAll('.waveform span');
+  waveSpans.forEach((span, i) => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const baseHeight = span.style.height;
+    const baseNum = parseInt(baseHeight);
+    animate(
+      span,
+      { transform: [`scaleY(1)`, `scaleY(${0.7 + (baseNum / 100) * 0.6})`, `scaleY(1)`] },
+      { duration: 2.4 + (i % 5) * 0.3, repeat: Infinity, easing: 'ease-in-out', delay: (i * 0.06) % 1.2 }
+    );
+  });
+
+  // --- Animated counters in problem + stats sections
+  const counters = document.querySelectorAll('[data-count]');
+  inView(counters, (info) => {
+    const el = info.target;
+    if (el.dataset.counted) return;
+    el.dataset.counted = "1";
+    const target = parseFloat(el.dataset.target);
+    const duration = 1.6;
+    const start = performance.now();
+    const tick = (now) => {
+      const t = Math.min(1, (now - start) / (duration * 1000));
+      const eased = 1 - Math.pow(1 - t, 3);
+      const val = Math.round(eased * target);
+      el.textContent = val;
+      if (t < 1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }, { amount: 0.5 });
+
+  // --- Mobile nav toggle
+  const toggle = document.getElementById('navToggle');
+  const drawer = document.getElementById('navDrawer');
+  if (toggle && drawer) {
+    toggle.addEventListener('click', () => {
+      const isOpen = drawer.classList.toggle('open');
+      toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    });
+    drawer.querySelectorAll('a').forEach(a => {
+      a.addEventListener('click', () => drawer.classList.remove('open'));
+    });
+  }
+
+  // --- Feature cards: subtle parallax on mouse move (desktop only)
+  const feats = document.querySelectorAll('.feat');
+  const isCoarse = window.matchMedia('(pointer: coarse)').matches;
+  if (!isCoarse && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    feats.forEach(card => {
+      card.addEventListener('mousemove', (e) => {
+        const r = card.getBoundingClientRect();
+        const x = (e.clientX - r.left) / r.width - 0.5;
+        const y = (e.clientY - r.top) / r.height - 0.5;
+        card.style.transform = `translateY(-3px) perspective(900px) rotateX(${-y * 2}deg) rotateY(${x * 2}deg)`;
+      });
+      card.addEventListener('mouseleave', () => {
+        card.style.transform = '';
+      });
+    });
+  }
+</script>
+
+</body>
+</html>

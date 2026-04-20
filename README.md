@@ -52,7 +52,7 @@ Non-negotiable checks every build runs before shipping:
 
 ...and the mega-skill auto-rejects drafts containing any of 40+ specific slop, security, or drift patterns.
 
-See a real output in [`demo/reelkit.html`](./demo/reelkit.html) — open it in any browser.
+See two real outputs — same product prompt, built on different versions of the pack — in [`demo/`](./demo/): [`reelkit-v1.html`](./demo/reelkit-v1.html) (5-rule release) vs [`reelkit-v2.html`](./demo/reelkit-v2.html) (updated pack with trend research + adventurous colour + multi-device + render verification). See [`demo/README.md`](./demo/README.md) for the exact prompt and side-by-side notes.
 
 ---
 
