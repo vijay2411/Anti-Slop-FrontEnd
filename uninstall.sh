@@ -1,17 +1,43 @@
 #!/usr/bin/env bash
-# Reverses install.sh: removes the 12 skills this pack installed.
-# Does NOT restore Anthropic's frontend-design - reinstall the official plugin if you want it back.
+# Reverses install.sh: removes the 13 skills from the chosen harness.
+# Does NOT restore Anthropic's frontend-design — reinstall the official
+# plugin if you want it back.
+#
+# Usage:
+#   ./uninstall.sh                  # default: claude
+#   ./uninstall.sh --target codex
+#   ./uninstall.sh --target gemini
+#   ./uninstall.sh --target all
+#   ./uninstall.sh --yes            # non-interactive
 
 set -euo pipefail
 
-TARGET="$HOME/.claude/skills"
+TARGET_MODE="claude"
 ASSUME_YES=0
 
-for arg in "$@"; do
-  case "$arg" in
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --target)
+      shift
+      TARGET_MODE="${1:-}"
+      ;;
+    --target=*)
+      TARGET_MODE="${1#--target=}"
+      ;;
     --yes|-y) ASSUME_YES=1 ;;
+    -h|--help)
+      sed -n '2,11p' "$0"
+      exit 0
+      ;;
+    *) echo "Unknown flag: $1" >&2; exit 1 ;;
   esac
+  shift
 done
+
+case "$TARGET_MODE" in
+  claude|codex|gemini|all) ;;
+  *) echo "Invalid --target: $TARGET_MODE (expected: claude, codex, gemini, all)" >&2; exit 1 ;;
+esac
 
 confirm() {
   local prompt="$1"
@@ -36,20 +62,51 @@ SKILLS=(
   taste-skill
 )
 
-echo "About to remove from $TARGET:"
-for s in "${SKILLS[@]}"; do printf "  - %s\n" "$s"; done
-echo ""
-
-if ! confirm "Proceed?"; then
-  echo "Aborted."
-  exit 0
-fi
-
-for s in "${SKILLS[@]}"; do
-  if [ -d "$TARGET/$s" ]; then
-    rm -rf "$TARGET/$s"
-    printf "removed %s\n" "$s"
+remove_from_dir() {
+  local target="$1"
+  local label="$2"
+  echo "[$label] About to remove from $target:"
+  for s in "${SKILLS[@]}"; do printf "  - %s\n" "$s"; done
+  echo ""
+  if ! confirm "[$label] Proceed?"; then
+    echo "[$label] Aborted."
+    return
   fi
-done
+  for s in "${SKILLS[@]}"; do
+    if [ -d "$target/$s" ]; then
+      rm -rf "$target/$s"
+      printf "[%s] removed %s\n" "$label" "$s"
+    fi
+  done
+}
 
-echo "Done. To restore Anthropic's frontend-design, reinstall the claude-plugins-official marketplace plugin."
+remove_gemini_extension() {
+  local ext_root="$HOME/.gemini/extensions/anti-slop-frontend"
+  if [ ! -d "$ext_root" ]; then
+    echo "[gemini] Extension not installed at $ext_root — nothing to do."
+    return
+  fi
+  echo "[gemini] About to remove the entire extension at $ext_root"
+  if ! confirm "[gemini] Proceed?"; then
+    echo "[gemini] Aborted."
+    return
+  fi
+  rm -rf "$ext_root"
+  printf "[gemini] removed %s\n" "$ext_root"
+}
+
+case "$TARGET_MODE" in
+  claude) remove_from_dir "$HOME/.claude/skills" "claude" ;;
+  codex)  remove_from_dir "$HOME/.codex/skills" "codex" ;;
+  gemini) remove_gemini_extension ;;
+  all)
+    remove_from_dir "$HOME/.claude/skills" "claude"
+    echo ""
+    remove_from_dir "$HOME/.codex/skills" "codex"
+    echo ""
+    remove_gemini_extension
+    ;;
+esac
+
+echo ""
+echo "Done."

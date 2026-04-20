@@ -2,15 +2,23 @@
 
 > **Stop Claude (and every other coding agent) from shipping purple-gradient, Inter-everywhere, 2×2-bento-card AI slop — while keeping the app functional, secure, and respectful of existing project UI.**
 
-A Claude Code skills pack that replaces Anthropic's default `frontend-design` with a curated stack of **13 skills** — one mega-router + one render verifier + 11 specialists — that enforce rich, intentional, motion-driven, multi-device, *verified* interfaces.
+A skills pack — works with **Claude Code**, **OpenAI Codex CLI**, and **Google Gemini CLI** — that replaces default frontend-design behavior with a curated stack of **13 skills** (one mega-router + one render verifier + 11 specialists) enforcing rich, intentional, motion-driven, multi-device, *verified* interfaces.
+
+### Install
+
+Clone once, then pick your harness:
 
 ```bash
 git clone https://github.com/vijay2411/Anti-Slop-FrontEnd.git
 cd Anti-Slop-FrontEnd
-./install.sh
+
+./install.sh                      # Claude Code (default)
+./install.sh --target codex       # OpenAI Codex CLI
+./install.sh --target gemini      # Google Gemini CLI
+./install.sh --target all         # install to all three
 ```
 
-That's it. Next frontend request you give Claude, the mega-skill fires first and walks the design the right way.
+Next frontend request you give the agent, the mega-skill fires first and walks the design the right way.
 
 ---
 
@@ -134,29 +142,39 @@ User: "build me a landing page for X"
 ```bash
 git clone https://github.com/vijay2411/Anti-Slop-FrontEnd.git
 cd Anti-Slop-FrontEnd
-./install.sh
+./install.sh --target <claude|codex|gemini|all>
 ```
 
 ### From zip
 ```bash
 unzip Anti-Slop-FrontEnd.zip
 cd Anti-Slop-FrontEnd
-./install.sh
+./install.sh --target <claude|codex|gemini|all>
 ```
 
 ### Flags
 ```bash
-./install.sh                   # interactive (default) — prompts before removing Anthropic's default
-./install.sh --yes             # assume yes to all prompts
-./install.sh --keep-anthropic  # keep Anthropic's frontend-design alongside ours
-./install.sh --help            # show usage
+./install.sh                      # default: claude (Claude Code)
+./install.sh --target codex       # OpenAI Codex CLI
+./install.sh --target gemini      # Google Gemini CLI
+./install.sh --target all         # all three
+./install.sh --yes                # assume yes to all prompts
+./install.sh --keep-anthropic     # keep Anthropic's frontend-design alongside (Claude only)
+./install.sh --help               # show usage
 ```
 
-### What the installer does
-1. Prompts to remove Anthropic's default `frontend-design` skill (recommended — our mega-skill replaces it).
-2. Clones the 5 upstream repos into `~/.claude/skills/`.
-3. Copies our 7 custom SKILL.md files into `~/.claude/skills/`.
-4. Drops wrapper `SKILL.md` files on top of each cloned repo so Claude can discover them (they bury their real SKILL.md in subpaths).
+### What the installer does (per-target)
+
+| Target | Install path | Extra |
+|---|---|---|
+| `claude` | `~/.claude/skills/<skill>/SKILL.md` | Prompts to remove Anthropic's default `frontend-design` |
+| `codex` | `~/.codex/skills/<skill>/SKILL.md` | Restart Codex after install |
+| `gemini` | `~/.gemini/extensions/anti-slop-frontend/skills/<skill>/SKILL.md` | Writes `gemini-extension.json` manifest; restart Gemini CLI |
+
+For every target the installer:
+1. Clones the 5 upstream repos into the skills directory
+2. Copies our 8 custom SKILL.md files (mega + verifier + 6 reference)
+3. Drops wrapper `SKILL.md` files on top of each cloned repo so the agent can discover them (they bury their real SKILL.md in subpaths)
 
 ### Verify it's working
 Open any Claude Code session and say:
@@ -167,10 +185,13 @@ The `anti-slop-frontend` skill should fire first — before any code — and wal
 
 ### Uninstall
 ```bash
-./uninstall.sh          # interactive
-./uninstall.sh --yes    # non-interactive
+./uninstall.sh                       # default: claude
+./uninstall.sh --target codex        # Codex
+./uninstall.sh --target gemini       # removes the whole Gemini extension dir
+./uninstall.sh --target all          # all three
+./uninstall.sh --yes                 # non-interactive
 ```
-Removes all 12 skill directories. Does **not** restore Anthropic's `frontend-design` — reinstall the `claude-plugins-official` marketplace plugin for that.
+Removes all 13 skill directories from the chosen target. Does **not** restore Anthropic's `frontend-design` — reinstall the `claude-plugins-official` marketplace plugin for that.
 
 ---
 
@@ -208,8 +229,8 @@ The mega-skill rejects any draft containing:
 
 ## FAQ
 
-**Will this work with Codex / Cursor / Cline?**
-The SKILL.md format is an open standard ([agentskills.io](https://agentskills.io/specification)). Wrappers target Claude Code's `~/.claude/skills/`. For Codex, symlink or copy into `~/.agents/skills/`. For others, check their docs.
+**Will this work with Codex / Gemini / Cursor / Cline?**
+Claude Code, Codex, and Gemini are all first-class supported via `./install.sh --target <harness>`. The SKILL.md format is an open standard ([agentskills.io](https://agentskills.io/specification)) and identical across all three. For Cursor / Cline / Windsurf (rule-based rather than skill-based), copy the mega-skill body into `.cursor/rules/anti-slop.md` (or `.clinerules`) manually — the routing logic translates cleanly.
 
 **The mega-skill feels too aggressive — can I tone it down?**
 Edit `~/.claude/skills/anti-slop-frontend/SKILL.md`. Soften the "non-negotiable" framing if you like. The aggressiveness is the feature.
